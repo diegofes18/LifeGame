@@ -24,7 +24,27 @@ SYSINIT
 ; -----------------------------------------------------------------------------
 
 ; TODO : PLACE YOUR CODE HERE
-
+    
+    ;Guardamos los registros
+    MOVEM.L D1-D7,-(A7)
+    
+    ;Desabilitamos interrupciones
+    OR.W    #$0700,SR
+    
+    ;Llamamos a las subrutinas
+    JSR SCRINIT
+    JSR MOUINIT
+    
+    ;activamos el simulador de excepciones
+    MOVE.B #32,D0
+    MOVE.B #5,D1
+    TRAP #15
+    
+    ;cambiamos a modo usuario
+    MOVE.W #$DFFF,(A7)
+    
+    MOVEM.L (A7)+,D0-D7
+    RTE
 
 
 
@@ -50,6 +70,25 @@ MOUINIT
 
 ; TODO : PLACE YOUR CODE HERE
 
+    ;Guardamos los registros
+    MOVEM.L D0-D1,-(A7)
+
+    ;Posición actual del mouse        
+    MOVE.B #61,D0
+    CLR.B D1
+    TRAP #15
+    
+    ;Guardamos los valores
+    MOVE.L  D1,(MOUY)
+    
+    ;Reestablecemos MOUEDGE
+    MOVE.B #0,(MOUEDGE)
+    
+    ;Instalamos MOUTRAP 
+    MOVE.L  #MOUREAD,($60+MOUTRAP*4)
+    
+    MOVEM.L (A7)+,D0-D7
+    RTE
 
 
 
@@ -72,6 +111,26 @@ MOUREAD
 ; -----------------------------------------------------------------------------
 
 ; TODO : PLACE YOUR CODE HERE
+
+    ;Guardamos los registros
+    MOVEM.L  D0-D1,-(A7)
+                    
+    ;Posición actual del mouse        
+    MOVE.B #61,D0
+    CLR.B D1
+    TRAP #15
+    
+    ;Almacenamos X,Y del mouse
+    MOVE.L  D1,(MOUY)
+    
+    ;Almacenamos el estado de los botones en MOUVAL
+    MOVE.B D0,(MOUVAL)
+    
+    ;Almacenamos MOUEDGE
+    
+    
+    MOVEM.L (A7)+,D0-D7
+    RTE
 
 
 
@@ -133,6 +192,7 @@ SCRUPD
             TRAP    #15
             MOVEM.W (A7)+,D0-D1
             RTE
+
 *~Font name~Courier New~
 *~Font size~11~
 *~Tab type~1~
