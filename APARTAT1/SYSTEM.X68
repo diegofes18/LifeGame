@@ -29,7 +29,7 @@ SYSINIT
     MOVEM.L D1-D7,-(A7)
     
     ;Desabilitamos interrupciones
-    OR.W    #$0700,SR
+    ORI.W    #$0700,SR
     
     ;Llamamos a las subrutinas
     JSR SCRINIT
@@ -41,7 +41,7 @@ SYSINIT
     TRAP #15
     
     ;cambiamos a modo usuario
-    MOVE.W #$DFFF,(A7)
+    MOVE.W #$DFFF,SR
     
     MOVEM.L (A7)+,D0-D7
     RTE
@@ -88,7 +88,7 @@ MOUINIT
     MOVE.L  #MOUREAD,($60+MOUTRAP*4)
     
     MOVEM.L (A7)+,D0-D7
-    RTE
+    RTS
 
 
 
@@ -192,6 +192,8 @@ SCRUPD
             TRAP    #15
             MOVEM.W (A7)+,D0-D1
             RTE
+
+
 
 *~Font name~Courier New~
 *~Font size~11~
