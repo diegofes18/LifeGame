@@ -24,12 +24,15 @@ SYSINIT
 ; -----------------------------------------------------------------------------
 
 ; TODO : PLACE YOUR CODE HERE
+    MOVE.W SR,-(A7)
     
-    ;Guardamos los registros
-    MOVEM.L D1-D7,-(A7)
-    
+    AND.W    #$DFFF,(A7)
     ;Desabilitamos interrupciones
-    ORI.W    #$0700,SR
+    ORI.W    #$0700,(A7)
+    ;Guardamos los registros
+    MOVEM.L D0-D1,-(A7)
+    
+    
     
     ;Llamamos a las subrutinas
     JSR SCRINIT
@@ -41,9 +44,8 @@ SYSINIT
     TRAP #15
     
     ;cambiamos a modo usuario
-    MOVE.W #$DFFF,SR
     
-    MOVEM.L (A7)+,D0-D7
+    MOVEM.L (A7)+,D0-D1
     RTE
 
 
@@ -81,23 +83,16 @@ MOUINIT
     ;Guardamos los valores
     MOVE.L  D1,(MOUY)
     
+    MOVE.B D0,(MOUVAL)
+    
     ;Reestablecemos MOUEDGE
     MOVE.B #0,(MOUEDGE)
     
     ;Instalamos MOUTRAP 
-    MOVE.L  #MOUREAD,($60+MOUTRAP*4)
+    MOVE.L  #MOUREAD,($80+MOUTRAP*4)
     
-    MOVEM.L (A7)+,D0-D7
+    MOVEM.L (A7)+,D0-D1
     RTS
-
-
-
-
-
-
-
-
-
 
 ; -----------------------------------------------------------------------------
 MOUREAD
@@ -128,9 +123,30 @@ MOUREAD
     
     ;Almacenamos MOUEDGE
     
+    AND.B  #MOUMSKLF,D0
+    BNE  .CERO  
     
-    MOVEM.L (A7)+,D0-D7
-    RTE
+    AND.B #MOUMSKRT,D0
+    BNE .UNO
+    
+    AND.B #MOUMSKMD,D0
+    BNE .DOS
+    
+    JMP .END
+    
+.CERO: 
+      AND.B #MOUMSKLF,(MOUEDGE)
+      JMP .END
+.UNO:
+      AND.B #MOUMSKRT,(MOUEDGE)
+      JMP .END
+
+.DOS:  AND.B #MOUMSKMD,(MOUEDGE)
+
+.END:  MOVEM.L (A7)+,D0-D1
+      RTE     
+
+
 
 
 
@@ -192,6 +208,7 @@ SCRUPD
             TRAP    #15
             MOVEM.W (A7)+,D0-D1
             RTE
+
 
 
 
