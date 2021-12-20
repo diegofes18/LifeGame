@@ -132,3 +132,7 @@ SDBTIE      DC.W    (SCRHEIGH+BTLVERSZ)/2+BTLVEMRG ; YTOP COORDINATE
             INCLUDE "VAR.X68"               ; USER VARIABLES
 
             END    START
+*~Font name~Courier New~
+*~Font size~11~
+*~Tab type~1~
+*~Tab size~4~
