@@ -106,24 +106,25 @@ BTLPLOT
 ; TODO : PLACE YOUR CODE HERE
             MOVEM.L A0/D0,-(A7)
 
-            ; TRAVERSE THE LIST
-
+            ;Recorremos la lista
             LEA     BTLDATA,A0
             MOVE.W  #BTLMXVDB-1,D0
 .LOOP       CMP.L   #$FFFFFFFF,(A0)
-            BEQ     .DONE
+            BEQ     .FIN
 
-            ; UPDATE EACH BUTTON
-
+            ;Actualizamos el botón
             JSR     BTNPLOT
 
-            ; GO TO THE NEXT BUTTON
-
+            ;Siguiente botón
             ADD.L   #BTNSZVDB,A0
-            DBRA.W  D0,.LOOP
+            
+            ;Volvemos al bucle para los otros botones
+            DBRA  D0,.LOOP
 
-.DONE       MOVEM.L (A7)+,A0/D0
+.FIN        MOVEM.L (A7)+,A0/D0
             RTS
+
+
 
 
 

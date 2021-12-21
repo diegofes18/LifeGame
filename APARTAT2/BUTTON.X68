@@ -41,9 +41,14 @@ BTNINIT
 ; MODIFIES : NONE
 ; -----------------------------------------------------------------------------
 
-; TODO : PLACE YOUR CODE HERE           
-            MOVE.W A1,(A0)
-            CLR.B 4(A0)            
+; TODO : PLACE YOUR CODE HERE  
+
+            ;Copiamos SDB (A1) en el contenido de VDB ((A0))         
+            MOVE.L A1,(A0)
+            
+            ;Limpiamos el B status
+            CLR.B 4(A0) 
+           
             RTS
 ; -----------------------------------------------------------------------------
 BTNUPD
@@ -58,7 +63,10 @@ BTNUPD
          MOVEM.L D0-D1/A0-A2,-(A7)
          
          MOVE.L (A0),A2
+         
+         ;Máscara para dejar a 0 los 3 últimos bits del status
          AND.B #%11111000,4(A0)
+         
          MOVE.W (MOUX),D0
          MOVE.W 2(A2),D1
          SUB.W D1,D0
@@ -75,7 +83,7 @@ IN_X:    MOVE.W (MOUY),D0
          BLE IN_ALL
          JMP FINAL
 
-IN_ALL:  OR.B #%00000001, 4(A0)
+IN_ALL:  OR.B #%00000001,4(A0)
          MOVE.B (MOUVAL),D0
          BTST.L #0,D0
          BEQ FINAL
@@ -84,8 +92,8 @@ IN_ALL:  OR.B #%00000001, 4(A0)
          BTST.L #0,D0
          BEQ FINAL
          OR.B #%00000100,4(A0)
-         MOVE.L 8(A0),A1
-         JSR (A1)
+         MOVE.L (A0),A1
+         JSR 8(A1)
          
 FINAL:   MOVEM.L (A7)+,D0-D1/A0-A2
          RTS
@@ -140,9 +148,9 @@ PRESSED: MOVE.B #81,D0
 OUT:     MOVE.B #81,D0
          MOVE.L #0,D1
          TRAP #15
-         JMP FINAL1
 
-FINAL1:   MOVE.L (A0),A1
+
+FINAL1:  MOVE.L (A0),A1
          
          MOVE.B #87,D0
          MOVE.W 2(A1),D1
@@ -153,6 +161,9 @@ FINAL1:   MOVE.L (A0),A1
          ADD.W 4(A1),D4
          TRAP #15
          RTS
+
+
+
 
 
 
