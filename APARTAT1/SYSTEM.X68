@@ -26,13 +26,14 @@ SYSINIT
 ; TODO : PLACE YOUR CODE HERE
     MOVE.W SR,-(A7)
     
+    ;Cambiamos a modo usuario
     AND.W    #$DFFF,(A7)
+    
     ;Desabilitamos interrupciones
     ORI.W    #$0700,(A7)
+    
     ;Guardamos los registros
     MOVEM.L D0-D1,-(A7)
-    
-    
     
     ;Llamamos a las subrutinas
     JSR SCRINIT
@@ -42,9 +43,8 @@ SYSINIT
     MOVE.B #32,D0
     MOVE.B #5,D1
     TRAP #15
-    
-    ;cambiamos a modo usuario
-    
+
+
     MOVEM.L (A7)+,D0-D1
     RTE
 
@@ -208,6 +208,7 @@ SCRUPD
             TRAP    #15
             MOVEM.W (A7)+,D0-D1
             RTE
+
 
 
 

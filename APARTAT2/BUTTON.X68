@@ -60,42 +60,77 @@ BTNUPD
 
 ; TODO : PLACE YOUR CODE HERE
          
-         MOVEM.L D0-D1/A0-A2,-(A7)
+            MOVEM.L D0-D7/A0-A2,-(A7)
          
-         MOVE.L (A0),A2
+            MOVE.L (A0),A2
          
-         ;Máscara para dejar a 0 los 3 últimos bits del status
-         AND.B #%11111000,4(A0)
+            ;Máscara para dejar a 0 los 3 últimos bits del status
+            AND.B #%11111000,4(A0)
          
-         MOVE.W (MOUX),D0
-         MOVE.W 2(A2),D1
-         SUB.W D1,D0
-         ADD.W 6(A2),D1
-         CMP.W D1,D0
-         BLE IN_X
-         JMP FINAL
+            MOVE.W (MOUX),D0
+            MOVE.W 2(A2),D1
+            SUB.W D1,D0
+            
+            MOVE.W 6(A2),D2
+            ADD.W D2,D1
+            CMP.W D0,D1
+         
+            BGE MAYOR_X
+            JMP FINAL
+            
+MAYOR_X:    CMP.W #0,D0
+            BLE FINAL
+            MOVE.W (MOUX),D3
+            CMP.W D3,D1
+            BGE IN_X 
+            JMP FINAL
 
-IN_X:    MOVE.W (MOUY),D0
-         MOVE.W (A2),D1
-         SUB.W D1,D0
-         ADD.W 4(A2),D1
-         CMP.W D1,D0
-         BLE IN_ALL
-         JMP FINAL
-
-IN_ALL:  OR.B #%00000001,4(A0)
-         MOVE.B (MOUVAL),D0
-         BTST.L #0,D0
-         BEQ FINAL
-         OR.B #%00000010,4(A0)
-         MOVE.B (MOUEDGE),D0
-         BTST.L #0,D0
-         BEQ FINAL
-         OR.B #%00000100,4(A0)
-         MOVE.L (A0),A1
-         JSR 8(A1)
+IN_X:       MOVE.W (MOUY),D0
+            MOVE.W (A2),D1
+            SUB.W D1,D0
+            
+            MOVE.W 4(A2),D2
+            ADD.W D2,D1
+            CMP.W D0,D1
+            BGE MAYOR_Y
+            JMP FINAL
+            
+MAYOR_Y:    CMP.W #0,D0
+            BLE FINAL
+            MOVE.W (MOUy),D3
+            CMP.W D3,D1
+            BGE BIT_I
+            JMP FINAL
          
-FINAL:   MOVEM.L (A7)+,D0-D1/A0-A2
+BIT_I:      ORI.B #%00000001,4(A0)
+            MOVE.B (MOUVAL),D1
+            BTST.L #0,D1
+            BNE BIT_P
+            JMP FINAL
+            
+BIT_P:      ORI.B #%00000010,4(A0)
+            MOVE.B (MOUEDGE),D1
+            BTST.L #0,D1
+            BNE BIT_C
+            JMP FINAL
+            
+BIT_C:      ORI.B #%00000100,4(A0)
+            MOVE.L 8(A1),A2
+            JSR (A2)
+
+;IN_ALL:  OR.B #%00000001,4(A0)
+ ;        MOVE.B (MOUVAL),D0
+  ;       BTST.L #0,D0
+   ;      BEQ FINAL
+    ;     OR.B #%00000010,4(A0)
+     ;    MOVE.B (MOUEDGE),D0
+      ;   BTST.L #0,D0
+       ;  BEQ FINAL
+        ;OR.B #%00000100,4(A0)
+         ;MOVE.L (A0),A1
+         ;JSR 8(A1)
+         
+FINAL:   MOVEM.L (A7)+,D0-D7/A0-A2
          RTS
 
 
@@ -118,6 +153,7 @@ BTNPLOT
 
 ; TODO : PLACE YOUR CODE HERE
 
+        MOVEM.L D0-D7/A0-A1,-(A7)
         MOVE.B #93,D0
         MOVE.B #BTNPENWD,D1
         TRAP #15
@@ -125,24 +161,25 @@ BTNPLOT
         MOVE.B #80,D0
         MOVE.L #BTNPENCL,D1
         TRAP #15
-      
-        BTST #0,4(A0)
+        
+        MOVE.B 4(A0),D3
+        BTST.L #0,D3
         BNE INSIDE
         
         JMP OUT
 
-INSIDE: MOVE.B #81,D0
+INSIDE: BTST.L #1,D3
+        BNE PRESSED
+        MOVE.B #81,D0
         MOVE.L #BTNSELCL,D1
         TRAP #15
-       
-        BTST #1,4(A0)
-        BNE PRESSED
         
         JMP FINAL1
 
 PRESSED: MOVE.B #81,D0
          MOVE.L #BTNPRSCL,D1
          TRAP #15
+         
          JMP FINAL1
          
 OUT:     MOVE.B #81,D0
@@ -160,7 +197,23 @@ FINAL1:  MOVE.L (A0),A1
          MOVE.W D2,D4
          ADD.W 4(A1),D4
          TRAP #15
+         
+         MOVE.B #95,D0
+         MOVE.W 2(A1),D1
+         ADD.W #40,D1
+         
+         MOVE.W (A1),D2
+         ADD.W #15,D2
+         
+         ADD.W #12,A1
+         
+         TRAP #15
+         
+         MOVEM.L (A7)+,D0-D7/A0-A1
+
          RTS
+
+
 
 
 

@@ -1,0 +1,146 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 22/12/2021 17:05:53
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :
+00000000                             3  * Written by :
+00000000                             4  * Date       :
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000  =00000280                  8  SCRWIDTH    EQU     640                     ; OUTPUT WINDOW WIDTH
+00000000  =000001E0                  9  SCRHEIGH    EQU     480                     ; OUTPUT WINDOW HEIGHT
+00000000  =00000014                 10  CIRCRAD     EQU     20                      ; CIRCLE RADIUS
+00000000                            11  
+00001000                            12      ORG    $1000
+00001000                            13  START:                  ; first instruction of program
+00001000                            14  
+00001000                            15              ; INSTALL TRAPS
+00001000  21FC 00001038 0080        16              MOVE.L  #SCRINIT,($80)
+00001008  21FC 0000105C 0084        17              MOVE.L  #DRAWCIRC,($84)
+00001010                            18  
+00001010                            19              ; SWITCH TO USER
+00001010  027C DFFF                 20              AND.W   #$DFFF,SR
+00001014                            21  
+00001014                            22              ; INIT SCREEN
+00001014  4E40                      23              TRAP    #0
+00001016                            24  
+00001016                            25              ; CLEAR SCREEN
+00001016  103C 000B                 26  .LOOP       MOVE.B  #11,D0
+0000101A  323C FF00                 27              MOVE.W  #$FF00,D1
+0000101E  4E4F                      28              TRAP    #15
+00001020                            29  
+00001020                            30              ; READ MOUSE
+00001020  103C 003D                 31              MOVE.B  #61,D0
+00001024  4201                      32              CLR.B   D1
+00001026  4E4F                      33              TRAP    #15
+00001028                            34  
+00001028                            35              ; DRAW THE CIRCLE
+00001028  2401                      36              MOVE.L  D1,D2
+0000102A  4E41                      37              TRAP    #1
+0000102C                            38  
+0000102C                            39              ; SWITCH BUFFERS (REPAINT SCREEN)
+0000102C  103C 005E                 40              MOVE.B  #94,D0
+00001030  4E4F                      41              TRAP    #15
+00001032                            42  
+00001032                            43              ; LOOP
+00001032  60E2                      44              BRA     .LOOP
+00001034                            45  
+00001034                            46  * Put program code here
+00001034                            47  
+00001034  FFFF FFFF                 48      SIMHALT             ; halt simulator
+00001038                            49  
+00001038                            50  * Put variables and constants here
+00001038                            51  
+00001038                            52  ; ------------------------------------------------------------------------------
+00001038                            53  SCRINIT
+00001038                            54  ; INITIALIZES THE OUTPUT WINDOW TO A RESOLUTION OF SCRWIDTH X SCRHEIGHT AND
+00001038                            55  ; WINDOWED MODE. ENABLES DOUBLE BUFFER
+00001038                            56  ; INPUT    : NONE
+00001038                            57  ; OUTPUT   : NONE
+00001038                            58  ; MODIFIES : NONE
+00001038                            59  ; ------------------------------------------------------------------------------
+00001038                            60  
+00001038                            61              ; STACK REGISTERS
+00001038  48E7 C000                 62              MOVEM.L D0-D1,-(A7)
+0000103C                            63  
+0000103C                            64              ; SET WINDOWED MODE
+0000103C  103C 0021                 65              MOVE.B  #33,D0
+00001040  7201                      66              MOVE.L  #1,D1
+00001042  4E4F                      67              TRAP    #15
+00001044                            68  
+00001044                            69              ; SET RESOLUTION (TRAP TASK IS THE SAME)
+00001044  223C 028001E0             70              MOVE.L  #SCRWIDTH<<16|SCRHEIGH,D1
+0000104A  4E4F                      71              TRAP    #15
+0000104C                            72  
+0000104C                            73              ; ENABLE DOUBLE BUFFER
+0000104C  103C 005C                 74              MOVE.B  #92,D0
+00001050  123C 0011                 75              MOVE.B  #17,D1
+00001054  4E4F                      76              TRAP    #15
+00001056                            77  
+00001056                            78              ; RESTORE REGISTERS
+00001056  4CDF 0003                 79              MOVEM.L (A7)+,D0-D1
+0000105A                            80  
+0000105A  4E73                      81              RTE
+0000105C                            82  
+0000105C                            83  ; ------------------------------------------------------------------------------
+0000105C                            84  DRAWCIRC
+0000105C                            85  ; DRAWS A WHITE CIRCLE FILLED IN RED AND CENTERED AT D2.L (SEE INPUT).
+0000105C                            86  ; INPUT    : D2.L: Y (MSW), X (LSW)
+0000105C                            87  ; OUTPUT   : NONE
+0000105C                            88  ; MODIFIES : NONE
+0000105C                            89  ; ------------------------------------------------------------------------------
+0000105C                            90  
+0000105C                            91              ; STACK REGISTERS
+0000105C  48E7 F800                 92              MOVEM.L D0-D4,-(A7)
+00001060                            93  
+00001060                            94              ; SET PEN COLOR TO WHITE ($00FFFFFF)
+00001060  103C 0050                 95              MOVE.B  #80,D0
+00001064  223C 00FFFFFF             96              MOVE.L  #$00FFFFFF,D1
+0000106A  4E4F                      97              TRAP    #15
+0000106C                            98  
+0000106C                            99              ; SET FILL COLOR TO RED ($000000FF)
+0000106C  103C 0051                100              MOVE.B  #81,D0
+00001070  223C 000000FF            101              MOVE.L  #$000000FF,D1
+00001076  4E4F                     102              TRAP    #15
+00001078                           103  
+00001078                           104              ; PLACE ALL COORDINATES TO THE CENTER
+00001078  3202                     105              MOVE.W  D2,D1
+0000107A  3602                     106              MOVE.W  D2,D3
+0000107C  4842                     107              SWAP    D2
+0000107E  3802                     108              MOVE.W  D2,D4
+00001080                           109  
+00001080                           110              ; SUBSTRACT RADIUS TO TOP AND LEFT COORDINATES
+00001080  0441 0014                111              SUB.W   #CIRCRAD,D1
+00001084  0442 0014                112              SUB.W   #CIRCRAD,D2
+00001088                           113  
+00001088                           114              ; ADD RADIUS TO BOTTOM AND RIGHT COORDINATES
+00001088  0643 0014                115              ADD.W   #CIRCRAD,D3
+0000108C  0644 0014                116              ADD.W   #CIRCRAD,D4
+00001090                           117  
+00001090                           118              ; DRAW THE ELLIPSE
+00001090  103C 0058                119              MOVE.B  #88,D0
+00001094  4E4F                     120              TRAP    #15
+00001096                           121  
+00001096                           122              ; RESTORE REGISTERS
+00001096  4CDF 001F                123              MOVEM.L (A7)+,D0-D4
+0000109A                           124  
+0000109A  4E73                     125              RTE
+0000109C                           126  
+0000109C                           127              END     START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CIRCRAD             14
+DRAWCIRC            105C
+SCRHEIGH            1E0
+SCRINIT             1038
+SCRWIDTH            280
+START               1000
+START:LOOP          1016

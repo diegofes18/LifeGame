@@ -1,3 +1,4 @@
+
 ; =============================================================================
 ; TITLE    : GAME OF LIFE APPLICATION
 ; AUTHOR   : ANTONI BURGUERA
@@ -132,6 +133,9 @@ SDBTIE      DC.W    (SCRHEIGH+BTLVERSZ)/2+BTLVEMRG ; YTOP COORDINATE
             INCLUDE "VAR.X68"               ; USER VARIABLES
 
             END    START
+
+
+
 *~Font name~Courier New~
 *~Font size~11~
 *~Tab type~1~
