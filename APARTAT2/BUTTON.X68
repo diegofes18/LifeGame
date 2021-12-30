@@ -65,7 +65,7 @@ BTNUPD
             MOVE.L (A0),A2
          
             ;Máscara para dejar a 0 los 3 últimos bits del status
-            AND.B #%11111000,4(A0)
+            AND.B #%11111000,4(A0)  ;?????
          
             MOVE.W (MOUX),D0
             MOVE.W 2(A2),D1
@@ -91,13 +91,13 @@ IN_X:       MOVE.W (MOUY),D0
             
             MOVE.W 4(A2),D2
             ADD.W D2,D1
-            CMP.W D0,D1
+            CMP D0,D1
             BGE MAYOR_Y
             JMP FINAL
             
 MAYOR_Y:    CMP.W #0,D0
             BLE FINAL
-            MOVE.W (MOUy),D3
+            MOVE.W (MOUY),D3
             CMP.W D3,D1
             BGE BIT_I
             JMP FINAL
@@ -118,17 +118,6 @@ BIT_C:      ORI.B #%00000100,4(A0)
             MOVE.L 8(A1),A2
             JSR (A2)
 
-;IN_ALL:  OR.B #%00000001,4(A0)
- ;        MOVE.B (MOUVAL),D0
-  ;       BTST.L #0,D0
-   ;      BEQ FINAL
-    ;     OR.B #%00000010,4(A0)
-     ;    MOVE.B (MOUEDGE),D0
-      ;   BTST.L #0,D0
-       ;  BEQ FINAL
-        ;OR.B #%00000100,4(A0)
-         ;MOVE.L (A0),A1
-         ;JSR 8(A1)
          
 FINAL:   MOVEM.L (A7)+,D0-D7/A0-A2
          RTS
@@ -212,6 +201,8 @@ FINAL1:  MOVE.L (A0),A1
          MOVEM.L (A7)+,D0-D7/A0-A1
 
          RTS
+
+
 
 
 

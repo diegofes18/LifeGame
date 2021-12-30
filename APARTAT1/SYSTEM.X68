@@ -27,7 +27,7 @@ SYSINIT
     MOVE.W SR,-(A7)
     
     ;Cambiamos a modo usuario
-    AND.W    #$DFFF,(A7)
+    AND.W #$DFFF,(A7)
     
     ;Desabilitamos interrupciones
     ORI.W    #$0700,(A7)
@@ -123,8 +123,8 @@ MOUREAD
     
     ;Almacenamos MOUEDGE
     
-    AND.B  #MOUMSKLF,D0
-    BNE  .CERO  
+    AND.B #MOUMSKLF,D0
+    BNE .CERO  
     
     AND.B #MOUMSKRT,D0
     BNE .UNO
@@ -135,15 +135,15 @@ MOUREAD
     JMP .END
     
 .CERO: 
-      AND.B #MOUMSKLF,(MOUEDGE)
+      OR.B #MOUMSKLF,(MOUEDGE)
       JMP .END
 .UNO:
-      AND.B #MOUMSKRT,(MOUEDGE)
+      OR.B #MOUMSKRT,(MOUEDGE)
       JMP .END
 
-.DOS:  AND.B #MOUMSKMD,(MOUEDGE)
+.DOS:  OR.B #MOUMSKMD,(MOUEDGE)
 
-.END:  MOVEM.L (A7)+,D0-D1
+.END: MOVEM.L (A7)+,D0-D1
       RTE     
 
 
@@ -208,6 +208,8 @@ SCRUPD
             TRAP    #15
             MOVEM.W (A7)+,D0-D1
             RTE
+
+
 
 
 

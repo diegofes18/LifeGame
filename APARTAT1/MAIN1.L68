@@ -1,6 +1,6 @@
 0000110A Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 23/12/2021 16:30:25
+Created On: 29/12/2021 12:54:44
 
 00000000                             1  ; =============================================================================
 00000000                             2  ; TITLE    : GAME OF LIFE APPLICATION
@@ -190,25 +190,25 @@ Created On: 23/12/2021 16:30:25
 00001070                           186      
 00001070                           187      ;Almacenamos MOUEDGE
 00001070                           188      
-00001070  C03C 0001                189      AND.B  #MOUMSKLF,D0
+00001070  803C 0001                189      OR.B  #MOUMSKLF,D0
 00001074  6600 0018                190      BNE  .CERO  
 00001078                           191      
-00001078  C03C 0002                192      AND.B #MOUMSKRT,D0
+00001078  803C 0002                192      OR.B #MOUMSKRT,D0
 0000107C  6600 001E                193      BNE .UNO
 00001080                           194      
-00001080  C03C 0004                195      AND.B #MOUMSKMD,D0
+00001080  803C 0004                195      OR.B #MOUMSKMD,D0
 00001084  6600 0024                196      BNE .DOS
 00001088                           197      
 00001088  4EF9 000010B2            198      JMP .END
 0000108E                           199      
 0000108E                           200  .CERO: 
-0000108E  0239 0001 0000117B       201        AND.B #MOUMSKLF,(MOUEDGE)
+0000108E  0039 0001 0000117B       201        OR.B #MOUMSKLF,(MOUEDGE)
 00001096  4EF9 000010B2            202        JMP .END
 0000109C                           203  .UNO:
-0000109C  0239 0002 0000117B       204        AND.B #MOUMSKRT,(MOUEDGE)
+0000109C  0039 0002 0000117B       204        OR.B #MOUMSKRT,(MOUEDGE)
 000010A4  4EF9 000010B2            205        JMP .END
 000010AA                           206  
-000010AA  0239 0004 0000117B       207  .DOS:  AND.B #MOUMSKMD,(MOUEDGE)
+000010AA  0039 0004 0000117B       207  .DOS:  OR.B #MOUMSKMD,(MOUEDGE)
 000010B2                           208  
 000010B2  4CDF 0003                209  .END:  MOVEM.L (A7)+,D0-D1
 000010B6  4E73                     210        RTE     
@@ -281,86 +281,87 @@ Created On: 23/12/2021 16:30:25
 0000110A                           277  
 0000110A                           278  
 0000110A                           279  
-0000110A                           280  -------------------- end include --------------------
-0000110A                           281  
-0000110A                           282  ; --- INITIALIZE --------------------------------------------------------------
-0000110A                           283  
-0000110A  4EB8 1000                284  START       JSR     SYSINIT                 ; INITIALIZE SYSTEM CODE
-0000110E                           285  
-0000110E                           286  ; --- UPDATE ------------------------------------------------------------------
-0000110E                           287  
-0000110E  4E41                     288  .LOOP       TRAP    #MOUTRAP                ; READ MOUSE
-00001110                           289  
-00001110                           290              ; SET COLOR DEPENDING ON THE MOUSE BUTTON PRESSED
-00001110                           291  
-00001110  4281                     292              CLR.L   D1                      ; PREPARE BLACK COLOR IN ADVANCE
-00001112  1039 0000117A            293              MOVE.B  (MOUVAL),D0             ; GET MOUSE BUTTONS STATUS
-00001118  6700 0024                294              BEQ     .SETCOL                 ; NO BUTTON: GO TO SET COLOR
-0000111C  223C 00FF0000            295              MOVE.L  #$00FF0000,D1           ; PREPARE BLUE COLOR IN ADVANCE
-00001122  0800 0000                296              BTST.L  #MOUBITLF,D0            ; IS IT LEFT BUTTON?
-00001126  6600 0016                297              BNE     .SETCOL                 ; IF LEFT: GO TO SET COLOR
-0000112A  223C 0000FF00            298              MOVE.L  #$0000FF00,D1           ; PREPARE GREEN COLOR IN ADVANCE
-00001130  C03C 0002                299              AND.B   #MOUMSKRT,D0            ; IS IT RIGHT BUTTON?
-00001134  6600 0008                300              BNE     .SETCOL                 ; IF RIGHT: GO TO SET COLOR
-00001138  223C 000000FF            301              MOVE.L  #$000000FF,D1           ; RED. MID BUTTON IS ASSURED HERE
-0000113E  103C 0051                302  .SETCOL     MOVE.B  #81,D0                  ; SET FILL COLOR TRAP ID
-00001142  4E4F                     303              TRAP    #15                     ; SET FILL COLOR
-00001144                           304  
-00001144                           305              ; PLACE THE TEXT CURSOR AT (0,0)
-00001144                           306  
-00001144  103C 000B                307              MOVE.B  #11,D0                  ; TASK ID TO POSITION TEXT
-00001148  4E4F                     308              TRAP    #15                     ; POSITION TEXT AT (0,0)
-0000114A                           309  
-0000114A                           310              ; PRINT THE MOUSE X COORDINATE
-0000114A                           311  
-0000114A  4281                     312              CLR.L   D1                      ; POS=(0,0) AND CLEAR ALL BITS
-0000114C  103C 0003                313              MOVE.B  #3,D0                   ; TASK ID TO PRINT A NUMBER
-00001150  3239 00001178            314              MOVE.W  (MOUX),D1               ; GET THE MOUSE X COORDINATE
-00001156  4E4F                     315              TRAP    #15                     ; PRINT THE X COORDINATE
-00001158                           316  
-00001158                           317              ; PRINT A COMMA
-00001158                           318  
-00001158  103C 0006                319              MOVE.B  #6,D0                   ; TASK ID TO PRINT A CHARACTER
-0000115C  123C 002C                320              MOVE.B  #',',D1                 ; CHARACTER TO PRINT
-00001160  4E4F                     321              TRAP    #15                     ; PRINT THE COMMA
-00001162                           322  
-00001162                           323              ; PRINT THE MOUSE Y COORDINATE
-00001162                           324  
-00001162  103C 0003                325              MOVE.B  #3,D0                   ; TASK ID TO PRINT A NUMBER
-00001166  3239 00001176            326              MOVE.W  (MOUY),D1               ; GET THE MOUSE Y COORDINATE
-0000116C  4E4F                     327              TRAP    #15                     ; PRINT THE Y COORDINATE
-0000116E                           328  
-0000116E                           329  ; --- PLOT --------------------------------------------------------------------
-0000116E                           330  
+0000110A                           280  
+0000110A                           281  -------------------- end include --------------------
+0000110A                           282  
+0000110A                           283  ; --- INITIALIZE --------------------------------------------------------------
+0000110A                           284  
+0000110A  4EB8 1000                285  START       JSR     SYSINIT                 ; INITIALIZE SYSTEM CODE
+0000110E                           286  
+0000110E                           287  ; --- UPDATE ------------------------------------------------------------------
+0000110E                           288  
+0000110E  4E41                     289  .LOOP       TRAP    #MOUTRAP                ; READ MOUSE
+00001110                           290  
+00001110                           291              ; SET COLOR DEPENDING ON THE MOUSE BUTTON PRESSED
+00001110                           292  
+00001110  4281                     293              CLR.L   D1                      ; PREPARE BLACK COLOR IN ADVANCE
+00001112  1039 0000117A            294              MOVE.B  (MOUVAL),D0             ; GET MOUSE BUTTONS STATUS
+00001118  6700 0024                295              BEQ     .SETCOL                 ; NO BUTTON: GO TO SET COLOR
+0000111C  223C 00FF0000            296              MOVE.L  #$00FF0000,D1           ; PREPARE BLUE COLOR IN ADVANCE
+00001122  0800 0000                297              BTST.L  #MOUBITLF,D0            ; IS IT LEFT BUTTON?
+00001126  6600 0016                298              BNE     .SETCOL                 ; IF LEFT: GO TO SET COLOR
+0000112A  223C 0000FF00            299              MOVE.L  #$0000FF00,D1           ; PREPARE GREEN COLOR IN ADVANCE
+00001130  C03C 0002                300              AND.B   #MOUMSKRT,D0            ; IS IT RIGHT BUTTON?
+00001134  6600 0008                301              BNE     .SETCOL                 ; IF RIGHT: GO TO SET COLOR
+00001138  223C 000000FF            302              MOVE.L  #$000000FF,D1           ; RED. MID BUTTON IS ASSURED HERE
+0000113E  103C 0051                303  .SETCOL     MOVE.B  #81,D0                  ; SET FILL COLOR TRAP ID
+00001142  4E4F                     304              TRAP    #15                     ; SET FILL COLOR
+00001144                           305  
+00001144                           306              ; PLACE THE TEXT CURSOR AT (0,0)
+00001144                           307  
+00001144  103C 000B                308              MOVE.B  #11,D0                  ; TASK ID TO POSITION TEXT
+00001148  4E4F                     309              TRAP    #15                     ; POSITION TEXT AT (0,0)
+0000114A                           310  
+0000114A                           311              ; PRINT THE MOUSE X COORDINATE
+0000114A                           312  
+0000114A  4281                     313              CLR.L   D1                      ; POS=(0,0) AND CLEAR ALL BITS
+0000114C  103C 0003                314              MOVE.B  #3,D0                   ; TASK ID TO PRINT A NUMBER
+00001150  3239 00001178            315              MOVE.W  (MOUX),D1               ; GET THE MOUSE X COORDINATE
+00001156  4E4F                     316              TRAP    #15                     ; PRINT THE X COORDINATE
+00001158                           317  
+00001158                           318              ; PRINT A COMMA
+00001158                           319  
+00001158  103C 0006                320              MOVE.B  #6,D0                   ; TASK ID TO PRINT A CHARACTER
+0000115C  123C 002C                321              MOVE.B  #',',D1                 ; CHARACTER TO PRINT
+00001160  4E4F                     322              TRAP    #15                     ; PRINT THE COMMA
+00001162                           323  
+00001162                           324              ; PRINT THE MOUSE Y COORDINATE
+00001162                           325  
+00001162  103C 0003                326              MOVE.B  #3,D0                   ; TASK ID TO PRINT A NUMBER
+00001166  3239 00001176            327              MOVE.W  (MOUY),D1               ; GET THE MOUSE Y COORDINATE
+0000116C  4E4F                     328              TRAP    #15                     ; PRINT THE Y COORDINATE
+0000116E                           329  
+0000116E                           330  ; --- PLOT --------------------------------------------------------------------
 0000116E                           331  
-0000116E  4E40                     332              TRAP    #SCRTRAP                ; SHOW GRAPHICS
-00001170  609C                     333              BRA     .LOOP
-00001172  FFFF FFFF                334              SIMHALT
-00001176                           335  
-00001176                           336  ; --- VARIABLES ---------------------------------------------------------------
-00001176                           337  
-00001176                           338              INCLUDE "SYSVAR.X68"            ; SYSTEM VARIABLES
-00001176                           339  ; =============================================================================
-00001176                           340  ; TITLE    : SYSTEM VARS
-00001176                           341  ; AUTHOR   : ANTONI BURGUERA
-00001176                           342  ; HISTORY  : 05-JULY-2021 - CREATION
-00001176                           343  ; COMMENTS : * ALL THESE VARS ARE USED TO SHARE DATA FROM SYSTEM TO USER. THUS
-00001176                           344  ;              THEY MUST NOT BE IN PROTECTED MEMORY.
-00001176                           345  ;
-00001176                           346  ;            * SINCE SOME SUBROUTINES TAKE ADVANTAGE OF THE ORDER IN WHICH
-00001176                           347  ;              THE VARIABLES ARE IN MEMORY, THEIR ORDER SHOULD NOT BE ALTERED.
-00001176                           348  ; =============================================================================
-00001176                           349  
-00001176                           350  ; --- MOUSE RELATED VARIABLES -------------------------------------------------
-00001176                           351  
-00001176                           352  MOUY        DS.W    1                       ; MOUSE Y COORDINATE
-00001178                           353  MOUX        DS.W    1                       ; MOUSE X COORDINATE
-0000117A                           354  MOUVAL      DS.B    1                       ; CURRENT MOUSE BUTTON STATUS
-0000117B                           355  MOUEDGE     DS.B    1                       ; RISING EDGES IN MOUVAL
-0000117C                           356              DS.W    0
-0000117C                           357  -------------------- end include --------------------
-0000117C                           358  
-0000117C                           359              END    START
+0000116E                           332  
+0000116E  4E40                     333              TRAP    #SCRTRAP                ; SHOW GRAPHICS
+00001170  609C                     334              BRA     .LOOP
+00001172  FFFF FFFF                335              SIMHALT
+00001176                           336  
+00001176                           337  ; --- VARIABLES ---------------------------------------------------------------
+00001176                           338  
+00001176                           339              INCLUDE "SYSVAR.X68"            ; SYSTEM VARIABLES
+00001176                           340  ; =============================================================================
+00001176                           341  ; TITLE    : SYSTEM VARS
+00001176                           342  ; AUTHOR   : ANTONI BURGUERA
+00001176                           343  ; HISTORY  : 05-JULY-2021 - CREATION
+00001176                           344  ; COMMENTS : * ALL THESE VARS ARE USED TO SHARE DATA FROM SYSTEM TO USER. THUS
+00001176                           345  ;              THEY MUST NOT BE IN PROTECTED MEMORY.
+00001176                           346  ;
+00001176                           347  ;            * SINCE SOME SUBROUTINES TAKE ADVANTAGE OF THE ORDER IN WHICH
+00001176                           348  ;              THE VARIABLES ARE IN MEMORY, THEIR ORDER SHOULD NOT BE ALTERED.
+00001176                           349  ; =============================================================================
+00001176                           350  
+00001176                           351  ; --- MOUSE RELATED VARIABLES -------------------------------------------------
+00001176                           352  
+00001176                           353  MOUY        DS.W    1                       ; MOUSE Y COORDINATE
+00001178                           354  MOUX        DS.W    1                       ; MOUSE X COORDINATE
+0000117A                           355  MOUVAL      DS.B    1                       ; CURRENT MOUSE BUTTON STATUS
+0000117B                           356  MOUEDGE     DS.B    1                       ; RISING EDGES IN MOUVAL
+0000117C                           357              DS.W    0
+0000117C                           358  -------------------- end include --------------------
+0000117C                           359  
+0000117C                           360              END    START
 
 No errors detected
 No warnings generated
