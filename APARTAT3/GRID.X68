@@ -57,8 +57,61 @@ GRDMUPD
 ; -----------------------------------------------------------------------------
 
 ; TODO : PLACE YOUR CODE HERE
+;D0:X ->COLUMNA , D1:Y->FILA , D2:MOUVAL, D3:NUM CASILLA
+            MOVEM.L D0-D3/A0,-(A7)
+            MOVE.W (MOUX),D0
+            MOVE.W (MOUY),D1
+ ;COMPROBAMOS SI EL MOUSE ESTA DENTRO DE LA MATRIZ          
+            CMP.W #GRDXOFF,D0
+            BLE  .FINAL        ; MOUSE ESTA EN EL MARGEN IZQUIERDO
+            SUB.W #GRDXOFF,D0 
+            CMP.W #GRDPXWID,D0
+            BLE IN_X
+            JMP .FINAL         ; NO ESTA EN LOS MARGENES X DE LA MATRIZ
+
+IN_X:       CMP.W #GRDYOFF,D1
+            BLE .FINAL
+            SUB.W #GRDYOFF,D1
+            CMP.W #GRDPXHEI,D1
+            BLE IN_GRID
+ 
+IN_GRID:    
+            MOVE.W GRDDST,A0
+            DIVS.W #GRDSZCEL,D0 ;MIRAMOS COLUMNA EN D0
+            DIVS.W #GRDSZCEL,D1   ;MIRAMOS FILA EN D1 
+            MOVE.B (MOUVAL),D2 ;VLOR DEL MOUSE A D2
+            AND.B #MOUMSKRT,D2 ;MASCARA PARA CLICK DERECHO
+            BNE RT_GRID
+            BTST.B #MOUMSKLF,D2 ;MASCARA PARA CLICK IZQUIERDO
+            BNE LF_GRID
+            JMP .FINAL       ; NO BUTTON PRESSED
+            
+RT_GRID:   ;BORRAR CASILLA
+            CMP.W #31,D0
+            BLE BP1 ;MITAD IZQUIERDA
+;OBTENEMOS EN D3 EL PUNTERO A LA CASILLA (FIILA*64+COLUMNA)
+            MOVE.W D1,D3
+            MULS.W #GRDWIDTH,D3
+            ADD.W D0,D3
+            MOVE.B #2,D3(A0) ;MOVEMOS EL VALOR A LA CASILLA
+            JMP .FINAL
+
+BP1:        MOVE.W D1,D3
+            MULS.W #GRDWIDTH,D3
+            ADD.W D0,D3
+            MOVE.B #1,D3(A0)
+            JMP .FINAL
 
 
+LF_GRID:   ;PINTAR CASILLA 
+            MOVE.W D1,D3
+            MULS.W #GRDWIDTH,D3
+            ADD.W D0,D3
+            MOVE.B #0,D3(A0)
+            
+
+.FINAL:   MOVEM.L (A7)+,D0-D3/A0
+          RTS
 
 
 
@@ -288,3 +341,8 @@ GRDPLOT
 
 
 
+
+*~Font name~Courier New~
+*~Font size~10~
+*~Tab type~1~
+*~Tab size~4~
