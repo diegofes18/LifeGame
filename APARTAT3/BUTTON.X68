@@ -65,7 +65,7 @@ BTNUPD
             MOVE.L (A0),A2
          
             ;Máscara para dejar a 0 los 3 últimos bits del status
-            AND.B #%11111000,4(A0)  ;?????
+            AND.B #%11111000,4(A0)  
          
             MOVE.W (MOUX),D0
             MOVE.W 2(A2),D1
@@ -201,6 +201,7 @@ FINAL1:  MOVE.L (A0),A1
          MOVEM.L (A7)+,D0-D7/A0-A1
 
          RTS
+
 
 
 

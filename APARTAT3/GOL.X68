@@ -124,6 +124,7 @@ GOLCLRBT    DC.W    BTLVEMRG                ; YTOP
             DC.W    BTLVERSZ                ; HEIGHT
             DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
 ; TODO: PLACE THE CALLBACK HERE
+            DC.L GOLINTIT
             DC.B    'CLEAR',0               ; TEXT
             DS.W    0
 
@@ -134,6 +135,7 @@ GOLRUNBT    DC.W    BTLVEMRG                ; YTOP
             DC.W    BTLVERSZ                ; HEIGHT
             DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
 ; TODO: PLACE THE CALLBACK HERE
+            DC.L   GOLTORUN
             DC.B    'RUN',0                 ; TEXT
             DS.W    0
 
@@ -144,6 +146,7 @@ GOLSTPBT    DC.W    BTLVEMRG                ; YTOP
             DC.W    BTLVERSZ                ; HEIGHT
             DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
 ; TODO: PLACE THE CALLBACK HERE
+            DC.L  GOLTOPAU
             DC.B    'STOP',0                ; TEXT
             DS.W    0
 
@@ -153,7 +156,8 @@ GOLSTEBT    DC.W    BTLVEMRG                ; YTOP
             DC.W    3*(SCRWIDTH/4)+BTLHOMRG ; XLEFT
             DC.W    BTLVERSZ                ; HEIGHT
             DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
-; TODO: PLACE THE CALLBACK HERE
+; TODO: PLACE THE CALLBACK HEREÇ
+            DC.L GOLDORUN
             DC.B    'STEP',0                ; TEXT
             DS.W    0
 
@@ -164,6 +168,7 @@ GOLLLFBT    DC.W    2*BTLVEMRG+BTLVERSZ     ; YTOP
             DC.W    BTLVERSZ                ; HEIGHT
             DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
 ; TODO: PLACE THE CALLBACK HERE
+            DC.L GRDLLEFT
             DC.B    'LOAD LEFT',0           ; TEXT
             DS.W    0
 
@@ -174,6 +179,7 @@ GOLLRTBT    DC.W    2*BTLVEMRG+BTLVERSZ     ; YTOP
             DC.W    BTLVERSZ                ; HEIGHT
             DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
 ; TODO: PLACE THE CALLBACK HERE
+            DC.L   GRDLRGT
             DC.B    'LOAD RIGHT',0          ; TEXT
             DS.W    0
 
@@ -194,5 +200,10 @@ GOLSAVBT    DC.W    2*BTLVEMRG+BTLVERSZ     ; YTOP
             DC.W    BTLVERSZ                ; HEIGHT
             DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
 ; TODO: PLACE THE CALLBACK HERE
+            DC.L  GRDSAVE
             DC.B    'SAVE',0          ; TEXT
             DS.W    0
+*~Font name~Courier New~
+*~Font size~10~
+*~Tab type~1~
+*~Tab size~4~

@@ -101,8 +101,6 @@ BP1:        MOVE.W D1,D3
             ADD.W D0,D3
             MOVE.B #1,D3(A0)
             JMP .FINAL
-
-
 LF_GRID:   ;PINTAR CASILLA 
             MOVE.W D1,D3
             MULS.W #GRDWIDTH,D3
@@ -156,15 +154,47 @@ GRDRUPD
 ; -----------------------------------------------------------------------------
 
 ; TODO : PLACE YOUR CODE HERE
+;D0:NUMERO DE CASILLAS, D1:CONTADOR ITERACIONES, D2:CELL VALUE, D3:NP1 ,D4:NP2, D5:EXTRA FOR NEIGHBOURS
+        MOVEM.L D0-D3/A0,-(A7)
+        
+        ADDQ.W #1,GRDNGEN ;ADD 1 TO THE NUMBER OF GENERATIONS
+        MOVE.L (GRDDST),A0 ;SWITCH MATRIX POINTERS
+        MOVE.L (GRDSRC),GRDDST
+        MOVE.L (A0),GRDSRC
+;MIRAMOS LAS CASILLAS QUE NACEN O SOBREVIVEN
+        MOVE.W #0,D1
+        MOVE.L (GRDSRC),A0
+        MOVE.L (GRDDST),A1
+        MOVE.W #64,D0
+        MULU.W #32,D0
+        SUBQ.W #1,D0 ;NUMBER OF ITERATIONS
+;LOOP THAT CHECKS THE CELL VALUE
+.MLOOP: MOVE.W D1(A0),D2 
+        JMP .NEIGHBOURS       
+.CELL:  CMP.W #0,D2
+        BEQ .BIRTH
+        JMP .SURVIVAL
+
+.SURVIVAL: 
+        
+      
+.BIRTH: 
+ 
+        DBRA D0,.MLOOP
+        JMP .FINAL
+        
+.NEIGHBOURS: 
+        LEA MOVIMIENTOS,A1
+.NLOOP: ;VECINA DERECHA
+        MOVE.W 1,D5
+        ADDQ.W D1,D5
+        
 
 
 
-
-
-
-
-
-
+.FINAL:
+        MOVEM.L (A7)+,D0-D3/A0
+        RTS
 
 
 
@@ -330,6 +360,7 @@ GRDPLOT
 ; -----------------------------------------------------------------------------
 
 ; TODO : PLACE YOUR CODE HERE
+
 
 
 
