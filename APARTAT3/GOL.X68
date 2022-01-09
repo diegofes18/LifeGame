@@ -124,7 +124,9 @@ GOLCLRBT    DC.W    BTLVEMRG                ; YTOP
             DC.W    BTLVERSZ                ; HEIGHT
             DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
 ; TODO: PLACE THE CALLBACK HERE
-            DC.L GOLINTIT
+            
+            DC.L   GRDINIT
+            
             DC.B    'CLEAR',0               ; TEXT
             DS.W    0
 
@@ -200,9 +202,12 @@ GOLSAVBT    DC.W    2*BTLVEMRG+BTLVERSZ     ; YTOP
             DC.W    BTLVERSZ                ; HEIGHT
             DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
 ; TODO: PLACE THE CALLBACK HERE
-            DC.L  GRDSAVE
+            DC.L    GRDSAVE
             DC.B    'SAVE',0          ; TEXT
             DS.W    0
+
+
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~

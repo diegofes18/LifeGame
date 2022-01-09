@@ -1,0 +1,297 @@
+00001B00 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 09/01/2022 15:05:37
+
+00000000                             1  ; =============================================================================
+00000000                             2  ; TITLE    : GAME OF LIFE APPLICATION
+00000000                             3  ; AUTHOR   : ANTONI BURGUERA
+00000000                             4  ; HISTORY  : 05-JULY-2021 - CREATION
+00000000                             5  ; COMMENTS : THIS IS AN APPLICATION. SO, IT IMPLEMENTS INITIALIZATION, UPDATE
+00000000                             6  ;            AND PLOT, AS WELL AS SOME AUXILIARY SUBROUTINES.
+00000000                             7  ; =============================================================================
+00000000                             8  
+00000000                             9  ; -----------------------------------------------------------------------------
+00000000                            10  GOLINIT
+00000000                            11  ; INITIALIZE GAME OF LIFE APPLICATION AS FOLLOWS:
+00000000                            12  ; * MAKES THE INTERNAL STATE TO BE "PAUSED/STOPPED"
+00000000                            13  ; * INITIALIZES THE USER INTERFACE (BY INITIALIZING THE BUTTONS LIST AND
+00000000                            14  ;   ADDING BUTTONS INTO IT)
+00000000                            15  ; * INITIALIZES THE GRID.
+00000000                            16  ; * INITIALIZES THE UTILITY CODE.
+00000000                            17  ; INPUT    : NONE
+00000000                            18  ; OUTPUT   : NONE
+00000000                            19  ; MODIFIES : NONE
+00000000                            20  ; -----------------------------------------------------------------------------
+00000000  48E7 FFFE                 21              MOVEM.L D0-D7/A0-A6,-(A7)
+Line 22 ERROR: Undefined symbol
+00000004  13FC 0016 005455B8        22              MOVE.B  #GOLSPAUS,(GOLSTATE)
+Line 23 ERROR: Undefined symbol
+0000000C  4EB9 004DBD16             23              JSR     BTLINIT
+00000012  41F9 0000003E             24              LEA     .SDBLIST,A0
+00000018  2258                      25  .LOOP       MOVE.L  (A0)+,A1
+0000001A  B3FC FFFFFFFF             26              CMP.L   #-1,A1
+00000020  6700 000A                 27              BEQ     .END
+Line 28 ERROR: Undefined symbol
+00000024  4EB9 004DBD16             28              JSR     BTLADD
+0000002A  60EC                      29              BRA     .LOOP
+Line 30 ERROR: Undefined symbol
+0000002C  4EB9 004DBD16             30  .END        JSR     GRDINIT
+Line 31 ERROR: Undefined symbol
+00000032  4EB9 004DBD16             31              JSR     UTLINIT
+00000038  4CDF 7FFF                 32              MOVEM.L (A7)+,D0-D7/A0-A6
+0000003C  4E75                      33              RTS
+0000003E= 00000122 00000134 ...     34  .SDBLIST    DC.L    GOLCLRBT,GOLRUNBT,GOLSTPBT,GOLSTEBT,GOLLLFBT,GOLLRTBT
+00000056= 00000196 000001A8 ...     35              DC.L    GOLLOABT,GOLSAVBT,-1
+00000062                            36  
+00000062                            37  ; -----------------------------------------------------------------------------
+00000062                            38  GOLUPD
+00000062                            39  ; UPDATE GAME OF LIFE APPLICATION AS FOLLOWS:
+00000062                            40  ; * UPDATES THE BUTTON LIST
+00000062                            41  ; * EXECUTES CODE DEPENDING ON THE CURRENT APPLICATION STATE.
+00000062                            42  ; INPUT    : NONE
+00000062                            43  ; OUTPUT   : NONE
+00000062                            44  ; MODIFIES : NONE
+00000062                            45  ; -----------------------------------------------------------------------------
+00000062  48E7 C0C0                 46              MOVEM.L A0-A1/D0-D1,-(A7)
+Line 47 ERROR: Undefined symbol
+00000066  4EB9 004DBD16             47              JSR     BTLUPD
+0000006C  41F9 00000088             48              LEA     .JMPTBL,A0
+00000072  4280                      49              CLR.L   D0
+Line 50 ERROR: Undefined symbol
+00000074  1039 004DBD16             50              MOVE.B  (GOLSTATE),D0
+0000007A  E508                      51              LSL.B   #2,D0
+0000007C  2070 0000                 52              MOVE.L  (A0,D0),A0
+00000080  4E90                      53              JSR     (A0)
+00000082  4CDF 0303                 54              MOVEM.L (A7)+,A0-A1/D0-D1
+00000086  4E75                      55              RTS
+Line 56 ERROR: Undefined symbol
+00000088= 0019F7F4 0000009C         56  .JMPTBL     DC.L    GRDMUPD,GOLDORUN
+00000090                            57  
+00000090                            58  ; -----------------------------------------------------------------------------
+00000090                            59  GOLPLOT
+00000090                            60  ; PLOTS THE APPLICATION BY CALLING BTLPLOT AND GRDPLOT
+00000090                            61  ; INPUT    : NONE
+00000090                            62  ; OUTPUT   : NONE
+00000090                            63  ; MODIFIES : NONE
+00000090                            64  ; -----------------------------------------------------------------------------
+Line 65 ERROR: Undefined symbol
+00000090  4EB9 004DBD16             65              JSR     BTLPLOT
+Line 66 ERROR: Undefined symbol
+00000096  4EF9 004DBD16             66              JMP     GRDPLOT
+0000009C                            67  
+0000009C                            68  ; -----------------------------------------------------------------------------
+0000009C                            69  GOLDORUN
+0000009C                            70  ; EXECUTES THE RUN STATE. IT ALSO CHECKS IF THE MAXIMUM NUMBER OF GENERATIONS
+0000009C                            71  ; IS REACHED AND, IF SO, ANNOUNCES THE WINNER.
+0000009C                            72  ; INPUT    : NONE
+0000009C                            73  ; OUTPUT   : NONE
+0000009C                            74  ; MODIFIES : NONE
+0000009C                            75  ; -----------------------------------------------------------------------------
+0000009C  48E7 8040                 76              MOVEM.L D0/A1,-(A7)
+Line 77 ERROR: Undefined symbol
+000000A0  0C79 BD16 005455B8        77              CMP.W   #GOLMAXGN,(GRDNGEN)
+000000A8  6D00 0034                 78              BLT     .DOIT
+000000AC  43F9 00000100             79              LEA     .TIE,A1
+Line 80 ERROR: Undefined symbol
+000000B2  3039 004DBD16             80              MOVE.W  (GRDNPLR1),D0
+Line 81 ERROR: Undefined symbol
+000000B8  B079 004DBD16             81              CMP.W   (GRDNPLR2),D0
+000000BE  6700 0012                 82              BEQ     .PLAYSOUND
+000000C2  43F9 000000EA             83              LEA     .P1WINS,A1
+000000C8  6E00 0008                 84              BGT     .PLAYSOUND
+000000CC  43F9 000000F5             85              LEA     .P2WINS,A1
+000000D2  103C 0046                 86  .PLAYSOUND  MOVE.B  #70,D0
+000000D6  4E4F                      87              TRAP    #15
+000000D8  4EB9 00000118             88  .NOSOUND    JSR     GOLTOPAU
+Line 89 ERROR: Undefined symbol
+000000DE  4EB9 004DBD16             89  .DOIT       JSR     GRDRUPD
+000000E4  4CDF 0201                 90              MOVEM.L (A7)+,D0/A1
+000000E8  4E75                      91              RTS
+000000EA= 50 31 57 49 4E 53 ...     92  .P1WINS     DC.B    'P1WINS.WAV',0
+000000F5= 50 32 57 49 4E 53 ...     93  .P2WINS     DC.B    'P2WINS.WAV',0
+00000100= 54 49 45 2E 57 41 ...     94  .TIE        DC.B    'TIE.WAV',0
+00000108                            95              DS.W    0
+00000108                            96  
+00000108                            97  ; -----------------------------------------------------------------------------
+00000108                            98  GOLTORUN
+00000108                            99  ; SWITCHES TO RUN STATE
+00000108                           100  ; INPUT    : NONE
+00000108                           101  ; OUTPUT   : NONE
+00000108                           102  ; MODIFIES : NONE
+00000108                           103  ; -----------------------------------------------------------------------------
+Line 104 ERROR: Undefined symbol
+00000108  4279 004DBD16            104              CLR.W   (GRDNGEN)               ; CLEAR GENERATIONS COUNT
+Line 105 ERROR: Undefined symbol
+0000010E  13FC 0016 005455B8       105              MOVE.B  #GOLSEXEC,(GOLSTATE)
+00000116  4E75                     106              RTS
+00000118                           107  
+00000118                           108  ; -----------------------------------------------------------------------------
+00000118                           109  GOLTOPAU
+00000118                           110  ; SWITCHES TO PAUSE STATE
+00000118                           111  ; INPUT    : NONE
+00000118                           112  ; OUTPUT   : NONE
+00000118                           113  ; MODIFIES : NONE
+00000118                           114  ; -----------------------------------------------------------------------------
+Line 115 ERROR: Undefined symbol
+00000118  13FC 0016 005455B8       115              MOVE.B  #GOLSPAUS,(GOLSTATE)
+00000120  4E75                     116              RTS
+00000122                           117  
+00000122                           118  ; --- STATIC DATA -------------------------------------------------------------
+00000122                           119  
+00000122                           120  ; CLEAR BUTTON SDB
+00000122                           121  
+Line 122 ERROR: Undefined symbol
+00000122= F7F4                     122  GOLCLRBT    DC.W    BTLVEMRG                ; YTOP
+Line 123 ERROR: Invalid syntax
+00000124=                          123              DC.W    0*(SCRWIDTH/4)+BTLHOMRG ; XLEFT
+Line 124 ERROR: Undefined symbol
+00000124= F7F4                     124              DC.W    BTLVERSZ                ; HEIGHT
+Line 125 ERROR: Undefined symbol
+00000126= F7F4                     125              DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
+00000128                           126  ; TODO: PLACE THE CALLBACK HERE
+00000128                           127              
+00000128  4EB8 0000                128              JSR   GOLINIT
+0000012C                           129              
+0000012C= 43 4C 45 41 52 00        130              DC.B    'CLEAR',0               ; TEXT
+00000132                           131              DS.W    0
+00000132                           132  
+00000132                           133  ; RUN BUTTON SDB
+00000132                           134  
+Line 135 ERROR: Symbol value differs between first and second pass
+00000132=                          135  GOLRUNBT    DC.W    BTLVEMRG                ; YTOP
+Line 136 ERROR: Invalid syntax
+00000132=                          136              DC.W    1*(SCRWIDTH/4)+BTLHOMRG ; XLEFT
+Line 137 ERROR: Undefined symbol
+00000132= F7F4                     137              DC.W    BTLVERSZ                ; HEIGHT
+Line 138 ERROR: Undefined symbol
+00000134= F7F4                     138              DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
+00000136                           139  ; TODO: PLACE THE CALLBACK HERE
+00000136= 00000108                 140              DC.L   GOLTORUN
+0000013A= 52 55 4E 00              141              DC.B    'RUN',0                 ; TEXT
+0000013E                           142              DS.W    0
+0000013E                           143  
+0000013E                           144  ; STOP BUTTON SDB
+0000013E                           145  
+Line 146 ERROR: Symbol value differs between first and second pass
+0000013E=                          146  GOLSTPBT    DC.W    BTLVEMRG                ; YTOP
+Line 147 ERROR: Invalid syntax
+0000013E=                          147              DC.W    2*(SCRWIDTH/4)+BTLHOMRG ; XLEFT
+Line 148 ERROR: Undefined symbol
+0000013E= F7F4                     148              DC.W    BTLVERSZ                ; HEIGHT
+Line 149 ERROR: Undefined symbol
+00000140= F7F4                     149              DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
+00000142                           150  ; TODO: PLACE THE CALLBACK HERE
+00000142= 00000118                 151              DC.L  GOLTOPAU
+00000146= 53 54 4F 50 00           152              DC.B    'STOP',0                ; TEXT
+0000014C                           153              DS.W    0
+0000014C                           154  
+0000014C                           155  ; STEP BUTTON SDB
+0000014C                           156  
+Line 157 ERROR: Symbol value differs between first and second pass
+0000014C=                          157  GOLSTEBT    DC.W    BTLVEMRG                ; YTOP
+Line 158 ERROR: Invalid syntax
+0000014C=                          158              DC.W    3*(SCRWIDTH/4)+BTLHOMRG ; XLEFT
+Line 159 ERROR: Undefined symbol
+0000014C= F7F4                     159              DC.W    BTLVERSZ                ; HEIGHT
+Line 160 ERROR: Undefined symbol
+0000014E= F7F4                     160              DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
+00000150                           161  ; TODO: PLACE THE CALLBACK HEREÇ
+00000150= 0000009C                 162              DC.L GOLDORUN
+00000154= 53 54 45 50 00           163              DC.B    'STEP',0                ; TEXT
+0000015A                           164              DS.W    0
+0000015A                           165  
+0000015A                           166  ; LOAD LEFT BUTTON SDB
+0000015A                           167  
+Line 168 ERROR: Symbol value differs between first and second pass
+0000015A=                          168  GOLLLFBT    DC.W    2*BTLVEMRG+BTLVERSZ     ; YTOP
+Line 169 ERROR: Invalid syntax
+0000015A=                          169              DC.W    0*(SCRWIDTH/4)+BTLHOMRG ; XLEFT
+Line 170 ERROR: Undefined symbol
+0000015A= F7F4                     170              DC.W    BTLVERSZ                ; HEIGHT
+Line 171 ERROR: Undefined symbol
+0000015C= F7F4                     171              DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
+0000015E                           172  ; TODO: PLACE THE CALLBACK HERE
+Line 173 ERROR: Undefined symbol
+0000015E= 0019F7F4                 173              DC.L GRDLLEFT
+00000162= 4C 4F 41 44 20 4C ...    174              DC.B    'LOAD LEFT',0           ; TEXT
+0000016C                           175              DS.W    0
+0000016C                           176  
+0000016C                           177  ; LOAD RIGHT BUTTON SDB
+0000016C                           178  
+Line 179 ERROR: Symbol value differs between first and second pass
+0000016C=                          179  GOLLRTBT    DC.W    2*BTLVEMRG+BTLVERSZ     ; YTOP
+Line 180 ERROR: Invalid syntax
+0000016C=                          180              DC.W    1*(SCRWIDTH/4)+BTLHOMRG ; XLEFT
+Line 181 ERROR: Undefined symbol
+0000016C= F7F4                     181              DC.W    BTLVERSZ                ; HEIGHT
+Line 182 ERROR: Undefined symbol
+0000016E= F7F4                     182              DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
+00000170                           183  ; TODO: PLACE THE CALLBACK HERE
+Line 184 ERROR: Undefined symbol
+00000170= 0019F7F4                 184              DC.L   GRDLRGT
+00000174= 4C 4F 41 44 20 52 ...    185              DC.B    'LOAD RIGHT',0          ; TEXT
+00000180                           186              DS.W    0
+00000180                           187  
+00000180                           188  ; LOAD ALL BUTTON SDB
+00000180                           189  
+Line 190 ERROR: Symbol value differs between first and second pass
+00000180=                          190  GOLLOABT    DC.W    2*BTLVEMRG+BTLVERSZ     ; YTOP
+Line 191 ERROR: Invalid syntax
+00000180=                          191              DC.W    2*(SCRWIDTH/4)+BTLHOMRG ; XLEFT
+Line 192 ERROR: Undefined symbol
+00000180= F7F4                     192              DC.W    BTLVERSZ                ; HEIGHT
+Line 193 ERROR: Undefined symbol
+00000182= F7F4                     193              DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
+00000184                           194  ; TODO: PLACE THE CALLBACK HERE
+00000184= 4C 4F 41 44 20 41 ...    195              DC.B    'LOAD ALL',0            ; TEXT
+0000018E                           196              DS.W    0
+0000018E                           197  
+0000018E                           198  ; SAVE BUTTON SDB
+0000018E                           199  
+Line 200 ERROR: Symbol value differs between first and second pass
+0000018E=                          200  GOLSAVBT    DC.W    2*BTLVEMRG+BTLVERSZ     ; YTOP
+Line 201 ERROR: Invalid syntax
+0000018E=                          201              DC.W    3*(SCRWIDTH/4)+BTLHOMRG ; XLEFT
+Line 202 ERROR: Undefined symbol
+0000018E= F7F4                     202              DC.W    BTLVERSZ                ; HEIGHT
+Line 203 ERROR: Undefined symbol
+00000190= F7F4                     203              DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
+00000192                           204  ; TODO: PLACE THE CALLBACK HERE
+Line 205 ERROR: Undefined symbol
+00000192= 0019F7F4                 205              DC.L    GRDSAVE
+00000196= 53 41 56 45 00           206              DC.B    'SAVE',0          ; TEXT
+0000019C                           207              DS.W    0
+0000019C                           208  
+Line 209 WARNING: END directive missing, starting address not set
+
+52 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+GOLCLRBT            122
+GOLDORUN            9C
+GOLDORUN:DOIT       DE
+GOLDORUN:NOSOUND    D8
+GOLDORUN:P1WINS     EA
+GOLDORUN:P2WINS     F5
+GOLDORUN:PLAYSOUND  D2
+GOLDORUN:TIE        100
+GOLINIT             0
+GOLINIT:END         2C
+GOLINIT:LOOP        18
+GOLINIT:SDBLIST     3E
+GOLLLFBT            168
+GOLLOABT            196
+GOLLRTBT            17E
+GOLPLOT             90
+GOLRUNBT            134
+GOLSAVBT            1A8
+GOLSTEBT            156
+GOLSTPBT            144
+GOLTOPAU            118
+GOLTORUN            108
+GOLUPD              62
+GOLUPD:JMPTBL       88
