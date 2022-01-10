@@ -192,6 +192,7 @@ GOLLOABT    DC.W    2*BTLVEMRG+BTLVERSZ     ; YTOP
             DC.W    BTLVERSZ                ; HEIGHT
             DC.W    SCRWIDTH/4-2*BTLHOMRG   ; WIDTH
 ; TODO: PLACE THE CALLBACK HERE
+            DC.L GRDLOAD 
             DC.B    'LOAD ALL',0            ; TEXT
             DS.W    0
 
@@ -205,6 +206,7 @@ GOLSAVBT    DC.W    2*BTLVEMRG+BTLVERSZ     ; YTOP
             DC.L    GRDSAVE
             DC.B    'SAVE',0          ; TEXT
             DS.W    0
+
 
 
 

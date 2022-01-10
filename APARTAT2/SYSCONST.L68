@@ -1,0 +1,73 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 10/01/2022 12:32:49
+
+00000000                             1  ; =============================================================================
+00000000                             2  ; TITLE    : SYSTEM CONSTANTS
+00000000                             3  ; AUTHOR   : ANTONI BURGUERA
+00000000                             4  ; HISTORY  : 05-JULY-2021 - CREATION
+00000000                             5  ; COMMENTS : * MOUVAL AND MOUEDGE FORMAT IS AS FOLLOWS:
+00000000                             6  ;              +---+---+---+---+---+---+---+---+
+00000000                             7  ;              | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+00000000                             8  ;              +---+---+---+---+---+---+---+---+
+00000000                             9  ;              \-------------------/ |   |   |
+00000000                            10  ;                        |           |   |   +-- LEFT MOUSE BUTTON
+00000000                            11  ;                        |           |   +------ RIGHT MOUSE BUTTON
+00000000                            12  ;                        |           +---------- CENTRAL MOUSE BUTTON
+00000000                            13  ;                        +---------------------- 0
+00000000                            14  ;              A "1" IN ONE OF THESE BITS IN MOUVAL MEANS "BUTTON PRESSED".
+00000000                            15  ;              A "0" IN ONE OF THESE BITS IN MOUVAL MEANS "BUTTON NOT PRESSED".
+00000000                            16  ;              A "1" IN ONE OF THESE BITS IN MOUEDGE MEANS "BUTTON CLICKED".
+00000000                            17  ;              A "0" IN ONE OF THESE BITS IN MOUEDGE MEANS "BUTTON NOT CLICKED".
+00000000                            18  ;              A "CLICK" IS A CHANGE FROM 0 TO 1 IN SUBSEQUENT UPDATES.
+00000000                            19  ;              BOTH MOUVEL AND MOUEDGE ARE UPDATED BY TRAP #MOUTRAP
+00000000                            20  ;
+00000000                            21  ;            * MASKS AND BIT POSITIONS ARE DEFINED TO EASE MOUSE ACCESS. FOR
+00000000                            22  ;              EXAMPLE, ONE CAN DO THE FOLLOWING TO CHECK IF THE LEFT BUTTON
+00000000                            23  ;              IS PRESSED:
+00000000                            24  ;
+00000000                            25  ;              BTST.L #MOUBITLF,(MOUVAL)
+00000000                            26  ;              BNE ...
+00000000                            27  ;
+00000000                            28  ;              ALTERNATIVELY, ONE CAN ALSO DO THE FOLLOWING DEPENDING ON THE
+00000000                            29  ;              CONTEXT:
+00000000                            30  ;
+00000000                            31  ;              MOVE.B  (MOUVAL),D0
+00000000                            32  ;              AND.B   #MOUMSKLF,D0
+00000000                            33  ;              BNE ...
+00000000                            34  ; =============================================================================
+00000000                            35  
+00000000                            36  ; --- SCREEN RELATED CONSTANTS ------------------------------------------------
+00000000                            37  
+00000000  =00000000                 38  SCRTRAP     EQU     0                       ; SCREEN REFRESH TRAP NUMBER
+00000000  =00000320                 39  SCRWIDTH    EQU     800                     ; SCREEN WIDTH (PIXELS)
+00000000  =00000258                 40  SCRHEIGH    EQU     600                     ; SCREEN HEIGHT (PIXELS)
+00000000                            41  
+00000000                            42  ; --- MOUSE RELATED CONSTANTS -------------------------------------------------
+00000000                            43  
+00000000  =00000001                 44  MOUTRAP     EQU     1                       ; MOUSE QUERY TRAP NUMBER
+00000000  =00000001                 45  MOUMSKLF    EQU     %00000001               ; LEFT MOUSE BUTTON MASK
+00000000  =00000002                 46  MOUMSKRT    EQU     %00000010               ; RIGHT MOUSE BUTTON MASK
+00000000  =00000004                 47  MOUMSKMD    EQU     %00000100               ; MIDDLE MOUSE BUTTON MASL
+00000000  =00000000                 48  MOUBITLF    EQU     0                       ; LEFT MOUSE BUTTON BIT POSITION
+00000000  =00000001                 49  MOUBITRT    EQU     1                       ; RIGHT MOUSE BUTTON BIT POSITION
+00000000  =00000002                 50  MOUBITMD    EQU     2                       ; MIDDLE MOUSE BUTTON BIT POSITION
+Line 51 WARNING: END directive missing, starting address not set
+
+No errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+MOUBITLF            0
+MOUBITMD            2
+MOUBITRT            1
+MOUMSKLF            1
+MOUMSKMD            4
+MOUMSKRT            2
+MOUTRAP             1
+SCRHEIGH            258
+SCRTRAP             0
+SCRWIDTH            320

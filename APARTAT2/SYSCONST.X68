@@ -48,6 +48,7 @@ MOUMSKMD    EQU     %00000100               ; MIDDLE MOUSE BUTTON MASL
 MOUBITLF    EQU     0                       ; LEFT MOUSE BUTTON BIT POSITION
 MOUBITRT    EQU     1                       ; RIGHT MOUSE BUTTON BIT POSITION
 MOUBITMD    EQU     2                       ; MIDDLE MOUSE BUTTON BIT POSITION
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~

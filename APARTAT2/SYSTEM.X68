@@ -107,47 +107,27 @@ MOUREAD
 
 ; TODO : PLACE YOUR CODE HERE
 
-    ;Guardamos los registros
-    MOVEM.L  D0-D3,-(A7)
-                    
-    ;Posición actual del mouse        
+    MOVEM.L D0-D1, -(A7)
+
+    ;OBTENIM POSICIO RATOLI
     MOVE.B #61,D0
     CLR.B D1
     TRAP #15
-    
-    ;Almacenamos X,Y del mouse
-    MOVE.L  D1,(MOUY)
-    
-    ;Almacenamos el estado de los botones en MOUVAL
-    MOVE.B D0,(MOUVAL)
-    
-    ;Almacenamos MOUEDGE
-    AND.B  #MOUMSKLF,D0
-    BNE  .CERO  
-    
-    AND.B #MOUMSKRT,D0
-    BNE .UNO
-    
-    AND.B #MOUMSKMD,D0
-    BNE .DOS
-    
-    JMP .END
-    
-.CERO: 
-      AND.B #MOUMSKLF,(MOUEDGE)
-      JMP .END
-.UNO:
-      AND.B #MOUMSKRT,(MOUEDGE)
-      JMP .END
 
-.DOS: AND.B #MOUMSKMD,(MOUEDGE)
-
-.END: MOVEM.L (A7)+,D0-D3
-      RTE     
+    MOVE.L D1,(MOUY)
+    NOT.B MOUVAL
+    MOVE.B D0,D1
+    AND.B MOUVAL,D1
+    MOVE.B D1, (MOUEDGE)
+    MOVE.B D0, (MOUVAL)
 
 
+    ;RESTAURAM I TORNAM
+    MOVEM.L (A7)+, D0-D1
+    RTE
 
 
+    
 
 
 
@@ -207,6 +187,9 @@ SCRUPD
             TRAP    #15
             MOVEM.W (A7)+,D0-D1
             RTE
+
+
+
 
 
 

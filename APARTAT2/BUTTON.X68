@@ -60,68 +60,202 @@ BTNUPD
 
 ; TODO : PLACE YOUR CODE HERE
          
-            MOVEM.L D0-D7/A0-A2,-(A7)
-         
-            MOVE.L (A0),A2
-         
-            ;Máscara para dejar a 0 los 3 últimos bits del status
-            AND.B #%11111000,4(A0)  ;?????
-         
-            MOVE.W (MOUX),D0
-            MOVE.W 2(A2),D1
-            SUB.W D1,D0
-            
-            MOVE.W 6(A2),D2
-            ADD.W D2,D1
-            CMP.W D0,D1
-         
-            BGE MAYOR_X
-            JMP FINAL
-            
-MAYOR_X:    CMP.W #0,D0
-            BLE FINAL
-            MOVE.W (MOUX),D3
-            CMP.W D3,D1
-            BGE IN_X 
-            JMP FINAL
+*            MOVEM.L D0-D7/A0-A2,-(A7)
+*         
+*            MOVE.L (A0),A2
+*         
+*            ;Máscara para dejar a 0 los 3 últimos bits del status
+*            ANDI.B #%11111000,4(A0)  
+*         
+*            MOVE.W (MOUX),D0
+*            MOVE.W 2(A2),D1
+*            SUB.W D1,D0
+*            
+*            MOVE.W 6(A2),D2
+*            ADD.W D2,D1
+*            CMP.W D0,D1
+*         
+*            BGE MAYOR_X
+*            JMP FINAL
+*            
+*MAYOR_X:    CMP.W #0,D0
+**           BLE FINAL
+*            MOVE.W (MOUX),D3
+*            CMP.W D3,D1
+*            BGE IN_X 
+*            JMP FINAL
+*
+*IN_X:       MOVE.W (MOUY),D0
+*            MOVE.W (A2),D1
+*            SUB.W D1,D0
+*            
+*            MOVE.W 4(A2),D2
+*            ADD.W D2,D1
+*            CMP D0,D1
+*            BGE MAYOR_Y
+*            JMP FINAL
+*            
+*MAYOR_Y:    CMP.W #0,D0
+*            BLE  FINAL
+**          MOVE.W (MOUY),D3
+*            CMP.W D3,D1
+*            BGE BIT_I
+*            JMP FINALL
+*         
+*BIT_I:      ORI.B #%00000001,4(A0)
+*            MOVE.B (MOUVAL),D1
+*            BTST.L #0,D1
+*            BNE BIT_P
+*            JMP FINAL
+*            
+*BIT_P:      ORI.B #%00000010,4(A0)
+*            MOVE.B (MOUEDGE),D1
+*            BTST.L #0,D1
+*            BNE BIT_C
+*            JMP FINAL
+*            
+*BIT_C:      ORI.B #%00000100,4(A0)
+*            MOVE.L 8(A1),A2
+*            JSR (A2)
+*
+*         
+*FINAL:      MOVEM.L (A7)+,D0-D7/A0-A2
+*            RTS
+*
 
-IN_X:       MOVE.W (MOUY),D0
-            MOVE.W (A2),D1
-            SUB.W D1,D0
-            
-            MOVE.W 4(A2),D2
-            ADD.W D2,D1
-            CMP D0,D1
-            BGE MAYOR_Y
-            JMP FINAL
-            
-MAYOR_Y:    CMP.W #0,D0
-            BLE FINAL
-            MOVE.W (MOUY),D3
-            CMP.W D3,D1
-            BGE BIT_I
-            JMP FINAL
-         
-BIT_I:      ORI.B #%00000001,4(A0)
-            MOVE.B (MOUVAL),D1
-            BTST.L #0,D1
-            BNE BIT_P
-            JMP FINAL
-            
-BIT_P:      ORI.B #%00000010,4(A0)
-            MOVE.B (MOUEDGE),D1
-            BTST.L #0,D1
-            BNE BIT_C
-            JMP FINAL
-            
-BIT_C:      ORI.B #%00000100,4(A0)
-            MOVE.L 8(A1),A2
-            JSR (A2)
+    MOVEM.L A0-A3/D0-D3, -(A7)
 
-         
-FINAL:   MOVEM.L (A7)+,D0-D7/A0-A2
-         RTS
+    ;A1-SDB +0
+    MOVE.L (A0),A1
 
+    ADDQ.L #4,A0
+
+    ;A0 APUNTA A VBD +4 STATTUS I POSAM ELS BITS CPI A 0
+    ANDI.B #%11111000,(A0)
+
+    ;MIRAR SI Y ES MAJOR QUE LA
+    ;COORDENADA Y DEL BOTO
+
+
+    ;TEMPORAL
+    ;YTOP COORDINATES
+    ;D1 - YTOP
+    MOVE.W (A1),D1
+    MOVE.W (MOUY),D2
+
+    ;A1-HEIGHT
+
+    MOVE.W 4(A1),D3
+
+
+
+    ;COMPARAM COORDENADES Y DEL RATOLI
+    ;AMB ELS PIXELS Y DEL BOTO
+    SUB.W D1,D2
+
+
+
+    ;MIRAM SI LA ANTERIOR DIFERENCIA ES MENOR QUE LA ALTURA
+    CMP.W D2,D3
+    BGE  .MAJOR_0_Y
+
+
+    JMP .FINAL
+
+
+
+ 
+;SABEMO QUE MOUY HA ESTAT MAJOR QUE LA
+;COORDENADA Y DEL BOTO
+
+
+.DINS_Y:
+
+    ;TEMPORAL
+    ;YTOP COORDINATES
+    ;D1 - YTOP
+
+    ;A1-XLEFT
+    MOVE.W 2(A1),D1
+
+    MOVE.W (MOUX),D2
+
+
+    ;A1-WIDTH
+    MOVE.W 6(A1),D3
+
+    ;COMPARAM COORDENADES x DEL RATOLI
+    ;AMB ELS PIXELS x DEL BOTO
+    SUB.W D1,D2
+
+    ;MIRAM SI LA ANTERIOR DIFERENCIA ES MENOR QUE LA
+    ;AMPLADA
+    CMP.W D2,D3
+    BGE  .MAJOR_0_X 
+    JMP .FINAL
+
+
+.MAJOR_0_X:
+    CMP #0,D2
+    BGE .BITI
+    JMP .FINAL
+
+.MAJOR_0_Y:
+    CMP #0,D2
+    BGE .DINS_Y
+    JMP .FINAL
+
+
+
+
+.BITI:
+    ;ACTIVAM BIT I
+    ORI.B #%00000001,(A0)
+
+    ;MOUSE STATUS A D1
+
+    MOVE.B (MOUVAL),D1
+    ;MIRAM BIT 0 PER VEURE SI EL CLICK ESQUERRE
+    ;SE HA APRETAT PRESSED
+    BTST.L #0,D1
+    ;SI HA ESTAT 1 BITP
+    BNE .BITP
+
+
+    JMP .FINAL
+
+
+.BITP: 
+    ;ACTIVAM EL BIT P
+    ORI.B #%0000010,(A0)
+    ;MIRAM BIT 0 PER VEURE SI EL BOTO ESQUERRE
+    ;SE HA APRETAT PRESSED
+    MOVE.B (MOUEDGE),D1
+    BTST.L #0,D1
+
+    ;SI HA ESTAT 1 A BITC
+    BNE .BITC
+
+
+    JMP .FINAL
+
+
+
+.BITC:
+
+     ORI.B #%00000100,(A0)
+     MOVE.L 8(A1),A2
+
+     ;EXECUTES CALLBACK
+     JSR  (A2)
+
+
+
+
+.FINAL:
+
+     MOVEM.L (A7)+,A0-A3/D0-D3 
+     RTS
 
 
 
@@ -201,6 +335,8 @@ FINAL1:  MOVE.L (A0),A1
          MOVEM.L (A7)+,D0-D7/A0-A1
 
          RTS
+
+
 
 
 

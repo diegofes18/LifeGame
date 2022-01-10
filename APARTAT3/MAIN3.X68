@@ -40,6 +40,7 @@ START       JSR     SYSINIT                 ; INITIALIZE SYSTEM CODE
             INCLUDE "VAR.X68"               ; USER VARIABLES
 
             END    START
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
