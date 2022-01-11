@@ -59,203 +59,126 @@ BTNUPD
 ; -----------------------------------------------------------------------------
 
 ; TODO : PLACE YOUR CODE HERE
-         
-*            MOVEM.L D0-D7/A0-A2,-(A7)
-*         
-*            MOVE.L (A0),A2
-*         
-*            ;Máscara para dejar a 0 los 3 últimos bits del status
-*            ANDI.B #%11111000,4(A0)  
-*         
-*            MOVE.W (MOUX),D0
-*            MOVE.W 2(A2),D1
-*            SUB.W D1,D0
-*            
-*            MOVE.W 6(A2),D2
-*            ADD.W D2,D1
-*            CMP.W D0,D1
-*         
-*            BGE MAYOR_X
-*            JMP FINAL
-*            
-*MAYOR_X:    CMP.W #0,D0
-**           BLE FINAL
-*            MOVE.W (MOUX),D3
-*            CMP.W D3,D1
-*            BGE IN_X 
-*            JMP FINAL
-*
-*IN_X:       MOVE.W (MOUY),D0
-*            MOVE.W (A2),D1
-*            SUB.W D1,D0
-*            
-*            MOVE.W 4(A2),D2
-*            ADD.W D2,D1
-*            CMP D0,D1
-*            BGE MAYOR_Y
-*            JMP FINAL
-*            
-*MAYOR_Y:    CMP.W #0,D0
-*            BLE  FINAL
-**          MOVE.W (MOUY),D3
-*            CMP.W D3,D1
-*            BGE BIT_I
-*            JMP FINALL
-*         
-*BIT_I:      ORI.B #%00000001,4(A0)
-*            MOVE.B (MOUVAL),D1
-*            BTST.L #0,D1
-*            BNE BIT_P
-*            JMP FINAL
-*            
-*BIT_P:      ORI.B #%00000010,4(A0)
-*            MOVE.B (MOUEDGE),D1
-*            BTST.L #0,D1
-*            BNE BIT_C
-*            JMP FINAL
-*            
-*BIT_C:      ORI.B #%00000100,4(A0)
-*            MOVE.L 8(A1),A2
-*            JSR (A2)
-*
-*         
-*FINAL:      MOVEM.L (A7)+,D0-D7/A0-A2
-*            RTS
-*
+    
+            ;Guardamos registros     
+            MOVEM.L A0-A3/D0-D4, -(A7)
 
-    MOVEM.L A0-A3/D0-D3, -(A7)
+            ;Movemos el contenido de VDB en A1
+            MOVE.L (A0),A2
 
-    ;A1-SDB +0
-    MOVE.L (A0),A1
+            ;Sumamos 4 a A0 para acceder a los bits I,P,C 
+            ADDQ.L #4,A0
 
-    ADDQ.L #4,A0
+            ;Ponemos I,P,C de A0 en 0
+            ANDI.B #%11111000,(A0)
 
-    ;A0 APUNTA A VBD +4 STATTUS I POSAM ELS BITS CPI A 0
-    ANDI.B #%11111000,(A0)
+            ;Movemos las coordenadas MOUY en D2,
+            ;y YTOP en D1
+            MOVE.W (MOUY),D1
+            MOVE.W (A2),D2
 
-    ;MIRAR SI Y ES MAJOR QUE LA
-    ;COORDENADA Y DEL BOTO
+            ;Movemos la altura del botón en D3
+            MOVE.W 4(A2),D3
+
+            ;Restamos la posición Y del ratón con la coordenada
+            ;Y superior, y comprobamos que sea menor que su altura
+            SUB.W D2,D1
+            CMP.W D1,D3
+            
+            ;Saltamos si MOUY es mayor
+            BGE MAYORY
+            
+            ;Saltamos si MOUY es menor
+            JMP FINAL
+            
+
+MAYORY:
+            ;Comprobamos que la coordenada del botón sea >0
+            CMP #0,D1
+            
+            ;Saltamos en DENTROY si MOUY es mayor
+            BGE DENTROY
+            
+            JMP FINAL
 
 
-    ;TEMPORAL
-    ;YTOP COORDINATES
-    ;D1 - YTOP
-    MOVE.W (A1),D1
-    MOVE.W (MOUY),D2
+DENTROY:
 
-    ;A1-HEIGHT
+            ;Si entramos aqui es porqué el ratón se encuentra
+            ;dentro de las coordenadas Y del botón
+            ;Ahora miraremos que esté dentro de X
+    
+            ;Movemos MOUX a D1, y XLEFT a D2
+            MOVE.W (MOUX),D1
+            MOVE.W 2(A2),D2
 
-    MOVE.W 4(A1),D3
+            ;El proceso que usaremos es el mismo que para la Y
+            MOVE.W 6(A2),D3
 
-
-
-    ;COMPARAM COORDENADES Y DEL RATOLI
-    ;AMB ELS PIXELS Y DEL BOTO
-    SUB.W D1,D2
-
-
-
-    ;MIRAM SI LA ANTERIOR DIFERENCIA ES MENOR QUE LA ALTURA
-    CMP.W D2,D3
-    BGE  .MAJOR_0_Y
-
-
-    JMP .FINAL
+            ;XLEFT - MOUX, y comprobar que sea mayor a la anchura
+            SUB.W D2,D1
+            CMP.W D1,D3
+    
+            BGE  MAYORX 
+        
+            JMP FINAL
 
 
-
- 
-;SABEMO QUE MOUY HA ESTAT MAJOR QUE LA
-;COORDENADA Y DEL BOTO
-
-
-.DINS_Y:
-
-    ;TEMPORAL
-    ;YTOP COORDINATES
-    ;D1 - YTOP
-
-    ;A1-XLEFT
-    MOVE.W 2(A1),D1
-
-    MOVE.W (MOUX),D2
+MAYORX:
+            ;Comprobamos que la coordenada del botón sea >0
+            CMP #0,D1
+            
+            BGE I
+            
+            JMP FINAL
 
 
-    ;A1-WIDTH
-    MOVE.W 6(A1),D3
+I:
+            ;Si entramos en aquí significa que el ratón se encontraba
+            ;dentro de un botón
+            
+            ;Ponemos el bit I de A0 en 1
+            ORI.B #%00000001,(A0)
 
-    ;COMPARAM COORDENADES x DEL RATOLI
-    ;AMB ELS PIXELS x DEL BOTO
-    SUB.W D1,D2
+            MOVE.B (MOUVAL),D4
+            
+            ;Comparamos si el ratón se está pulsando(P=1)
+            BTST.L #0,D4
+            
+            ;Saltamos si el bit P estaba en 1
+            BNE P
 
-    ;MIRAM SI LA ANTERIOR DIFERENCIA ES MENOR QUE LA
-    ;AMPLADA
-    CMP.W D2,D3
-    BGE  .MAJOR_0_X 
-    JMP .FINAL
-
-
-.MAJOR_0_X:
-    CMP #0,D2
-    BGE .BITI
-    JMP .FINAL
-
-.MAJOR_0_Y:
-    CMP #0,D2
-    BGE .DINS_Y
-    JMP .FINAL
+            JMP FINAL
 
 
+P: 
+            ;Ponemos el bit P en 1 porque el click derecho se ha pulsado
+            ORI.B #%0000010,(A0)
+            
+            ;Miramos mediante el bit menos significativo de MOUEDGE 
+            ;si el ratón ha sido pulsado
+            MOVE.B (MOUEDGE),D4
+            BTST.L #0,D4
+
+            ;Saltamos si C=1
+            BNE C
+
+            JMP FINAL
 
 
-.BITI:
-    ;ACTIVAM BIT I
-    ORI.B #%00000001,(A0)
+C:
+            ;Ponemos C en 1
+            ORI.B #%00000100,(A0)
+            MOVE.L 8(A2),A3
 
-    ;MOUSE STATUS A D1
-
-    MOVE.B (MOUVAL),D1
-    ;MIRAM BIT 0 PER VEURE SI EL CLICK ESQUERRE
-    ;SE HA APRETAT PRESSED
-    BTST.L #0,D1
-    ;SI HA ESTAT 1 BITP
-    BNE .BITP
+            ;Realizamos el callback para el sonido
+            JSR  (A3)
 
 
-    JMP .FINAL
+FINAL:
 
-
-.BITP: 
-    ;ACTIVAM EL BIT P
-    ORI.B #%0000010,(A0)
-    ;MIRAM BIT 0 PER VEURE SI EL BOTO ESQUERRE
-    ;SE HA APRETAT PRESSED
-    MOVE.B (MOUEDGE),D1
-    BTST.L #0,D1
-
-    ;SI HA ESTAT 1 A BITC
-    BNE .BITC
-
-
-    JMP .FINAL
-
-
-
-.BITC:
-
-     ORI.B #%00000100,(A0)
-     MOVE.L 8(A1),A2
-
-     ;EXECUTES CALLBACK
-     JSR  (A2)
-
-
-
-
-.FINAL:
-
-     MOVEM.L (A7)+,A0-A3/D0-D3 
-     RTS
+            MOVEM.L (A7)+,A0-A3/D0-D4
+            RTS
 
 
 
@@ -276,65 +199,100 @@ BTNPLOT
 
 ; TODO : PLACE YOUR CODE HERE
 
-        MOVEM.L D0-D7/A0-A1,-(A7)
-        MOVE.B #93,D0
-        MOVE.B #BTNPENWD,D1
-        TRAP #15
+            ;Guardamos registros
+            MOVEM.L D0-D7/A0-A1,-(A7)
         
-        MOVE.B #80,D0
-        MOVE.L #BTNPENCL,D1
-        TRAP #15
+            ;Usamos el trap #15 para la anchura del contorno
+            MOVE.B #93,D0
+            MOVE.B #BTNPENWD,D1
+            TRAP #15
         
-        MOVE.B 4(A0),D3
-        BTST.L #0,D3
-        BNE INSIDE
+            ;Usamos el trap #15 para el color del contorno
+            MOVE.B #80,D0
+            MOVE.L #BTNPENCL,D1
+            TRAP #15
         
-        JMP OUT
-
-INSIDE: BTST.L #1,D3
-        BNE PRESSED
-        MOVE.B #81,D0
-        MOVE.L #BTNSELCL,D1
-        TRAP #15
+            ;Miramos si el ratón está dentro del botón, mediante el bit 
+            ;menos significativo de VDB
+            MOVE.B 4(A0),D3
+            BTST.L #0,D3
+            
+            ;Si el bit vale 1 significa que está dentro
+            BNE DENTRO
         
-        JMP FINAL1
-
-PRESSED: MOVE.B #81,D0
-         MOVE.L #BTNPRSCL,D1
-         TRAP #15
-         
-         JMP FINAL1
-         
-OUT:     MOVE.B #81,D0
-         MOVE.L #0,D1
-         TRAP #15
+            JMP FUERA
 
 
-FINAL1:  MOVE.L (A0),A1
-         
-         MOVE.B #87,D0
-         MOVE.W 2(A1),D1
-         MOVE.W (A1),D2
-         MOVE.W D1,D3
-         ADD.W 6(A1),D3
-         MOVE.W D2,D4
-         ADD.W 4(A1),D4
-         TRAP #15
-         
-         MOVE.B #95,D0
-         MOVE.W 2(A1),D1
-         ADD.W #40,D1
-         
-         MOVE.W (A1),D2
-         ADD.W #15,D2
-         
-         ADD.W #12,A1
-         
-         TRAP #15
-         
-         MOVEM.L (A7)+,D0-D7/A0-A1
+DENTRO: 
+            ;Miramos si el ratón se está pulsando dentro de un botón
+            ;mediante el bit P
+            BTST.L #1,D3
+            
+            ;Saltamos si está pulsado
+            BNE PULSADO
+            
+            ;Si no està pulsado usamos la tarea 81 del trap #15 para
+            ;asignarle color correspondiente 
+            MOVE.B #81,D0
+            MOVE.L #BTNSELCL,D1
+            TRAP #15
+        
+            JMP FINAL1
+            
 
-         RTS
+PULSADO:    
+            ;Usamos la tarea 81 del trap #15 para asignarle el color 
+            ;correspondiente al botón, para cuando se pulsa
+            MOVE.B #81,D0
+            MOVE.L #BTNPRSCL,D1
+            TRAP #15
+         
+            JMP FINAL1
+         
+FUERA:      
+            ;Usamos la tarea 81 del trap #15 para asignarle el color 
+            ;correspondiente al botón, para cuando el ratón se encuentra
+            ;fuera del botón 
+            MOVE.B #81,D0
+            MOVE.L #0,D1
+            TRAP #15
+
+
+FINAL1:     
+            MOVE.L (A0),A1
+         
+            ;Usamos la tarea 87 del trap #15 para dibujar el rectangulo
+            ;con sus coordenadas correspondientes
+            MOVE.B #87,D0
+            MOVE.W 2(A1),D1
+            MOVE.W (A1),D2
+            MOVE.W D1,D3
+            ADD.W 6(A1),D3
+            MOVE.W D2,D4
+            ADD.W 4(A1),D4
+            TRAP #15
+         
+            ;Usamos la tarea 95 del trap #15 para escribir el texto 
+            ;correcto en el rectangulo
+            MOVE.B #95,D0
+            MOVE.W 2(A1),D1
+            ADD.W #40,D1
+         
+            MOVE.W (A1),D2
+            ADD.W #15,D2
+         
+            ADD.W #12,A1
+         
+            TRAP #15
+         
+            MOVEM.L (A7)+,D0-D7/A0-A1
+            RTS
+
+        
+
+
+
+
 
 
 

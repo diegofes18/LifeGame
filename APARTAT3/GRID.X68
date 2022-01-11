@@ -27,6 +27,7 @@ GRDINIT
 ; OUTPUT   : NONE
 ; MODIFIES : NONE
 ; -----------------------------------------------------------------------------
+;Inicia la matriz
             MOVEM.L A0/D0,-(A7)
             MOVE.L  #GRDMATR0,(GRDSRC)
             MOVE.L  #GRDMATR1,(GRDDST)
@@ -62,24 +63,26 @@ GRDMUPD
             CLR.L D0
             CLR.L D2
             CLR.L D1
+;COMPROBAMOS SI SE HA PULSADO EL MOUSE
             MOVE.B (MOUVAL),D3
             CMP.B #0,D3
             BEQ .FINAL
  ;COMPROBAMOS SI EL MOUSE ESTA DENTRO DE LA MATRIZ          
             MOVE.W (MOUX),D1
-            CMP.W #GRDXOFF,D1
+            CMP.W #GRDXOFF,D1 ;SI ESTA EN LAS X
             BLE .FINAL
-            SUB.W #GRDXOFF,D1
+            SUB.W #GRDXOFF,D1 ;POSICION RELATIVA A LA MATRIZ(X)
             CMP.W #GRDPXWID,D1
             BGE .FINAL
-            MOVE.W (MOUY),D2
-            CMP.W #GRDYOFF,D2
+           
+            MOVE.W (MOUY),D2   
+            CMP.W #GRDYOFF,D2  
             BLE .FINAL
-            SUB.W #GRDYOFF,D2
+            SUB.W #GRDYOFF,D2  ;POSICION RELATIVA A LA MATRIZ (Y)
             CMP.W #GRDPXHEI,D2
-            
             BGE .FINAL
             
+           
             DIVS.W #GRDSZCEL,D1
             DIVS.W #GRDSZCEL,D2
             LEA GRDDST,A0
@@ -92,20 +95,19 @@ GRDMUPD
             DIVS.W #GRDWIDTH/2,D4
             ADDQ.B #1,D4
             MOVE.B D4,(A0,D0)
-            CMP.B #1,D4
-            BNE .P1
-            ADD.W #1,(GRDNPLR1)
+        
+            CMP.B #1,D4 ;LADO IZQUIERDO
+            BNE .P2
+            ADD.W #1,(GRDNPLR1) ;MARCADOR P3
             JMP .FINAL
-.P1         
-            CMP.B #2,D4
+.P2         
+            CMP.B #2,D4 ;LADO DERECHO
             BNE .FINAL
-            ADD.W #1,(GRDNPLR2)
+            ADD.W #1,(GRDNPLR2) ;MARCADOR P2
             JMP .FINAL
-            
-.R_GRID: CLR.B (A0,D0)
- 
 
-            
+;BOTON DERECHO EN LA CASILLA           
+.R_GRID:    CLR.B (A0,D0)
 
 .FINAL:   MOVEM.L (A7)+,D0-D4/A0
           RTS
@@ -317,11 +319,12 @@ GRDLLEFT
             MOVE.W  #GRDWIDTH-1,D2
 .COPY       MOVE.B  (A1)+,D0                ; PICK ONE LOADED CHARACTER
             SUB.B   #'0',D0                 ; CONVERT FROM ASCII TO NUMBER
-            CMP.B #2,D0
-            BNE .CONTINUAR
+            
+            CMP.B #2,D0                     ;SI LEE UN 2 PONE UN 0 Y CONTINUA
+            BNE .SIGUIENTE
             MOVE.B #0,(A0)+
             JMP .CLEAR
-.CONTINUAR            
+.SIGUIENTE            
             MOVE.B  D0,(A0)+                ; STORE DATA
 .CLEAR            
             ADDQ.L  #1,A1                   ; SKIP THE COMMA
@@ -389,11 +392,12 @@ GRDLRGT
             MOVE.W  #GRDWIDTH-1,D2
 .COPY       MOVE.B  (A1)+,D0                ; PICK ONE LOADED CHARACTER
             SUB.B   #'0',D0                 ; CONVERT FROM ASCII TO NUMBER
-            CMP.B #1,D0
-            BNE .CONTINUAR
+           
+            CMP.B #1,D0                     ;SI LEE UN 1 PONE UN 0 Y CONTINUA
+            BNE .SIGUIENTE
             MOVE.B #0,(A0)+
             JMP .CLEAR
-.CONTINUAR            
+.SIGUIENTE            
             MOVE.B  D0,(A0)+                ; STORE DATA
 .CLEAR            
             ADDQ.L  #1,A1                   ; SKIP THE COMMA
@@ -419,148 +423,147 @@ GRDPLOT
 ; TODO : PLACE YOUR CODE HERE
 
     MOVEM.L D0-D6/A0-A3, -(A7)
-    LEA GRDDST, A0            ; A0: POINTER TO THE DATA TO WRITE
+    
+    LEA GRDDST, A0      ;A0: PUNTERO A DONDE SE ESCRIBE
     LEA GRDNPLR1, A1
     LEA GRDNPLR2, A2
-    CLR.W (A1)
-    CLR.W (A2)
+    MOVE.W #0,(A1)
+    MOVE.W #0,(A2)    
     
-    
-    ;;;;;;;;;;;;;;;;;;
-    
-    
-    ;GRID
-    MOVE.W  #GRDHEIGH,D5          ; NUMBER OF ROWS
+    MOVE.W  #GRDHEIGH,D5 ;N FILAS
     SUBQ.W #1,D5
     
-    MOVE.W  #GRDWIDTH,D6          ; NUMBER OF COLUMNS
+    MOVE.W  #GRDWIDTH,D6 ;N COLUMNAS
     SUBQ.W #1,D6
     
     
-    ;GREEN PEN
+    ;VERDE
     MOVE.B #80,D0
     MOVE.L #CLRDKGRN,D1
     TRAP #15
-
   
-    ;CHANGE WIDTH OF PEN
+    ;ANCHURA
     MOVE.B #93,D0
     MOVE.B #2,D1
     TRAP #15
     
-    MOVE.W #GRDXOFF, D3     ;INITIAL POSITION GRID X
-    MOVE.W #GRDYOFF, D2     ;INITIAL POSITION GRID Y
+    MOVE.W #GRDYOFF, D2     ;CORDENADA INICIAL Y
+    MOVE.W #GRDXOFF, D3     ;COORDENADA INICIAL X
     
     
-.FILA:
+    
+.ROW:
     
     MOVE.B (A0)+,D7
-   
-    ;CHECK IF IS PLAYER 1'S CELL
-    CMP #1,D7
-    BEQ .PLAYER1
-    ;CHECK IF IS PLAYER 2'S CELL
-    CMP #2,D7
-    BEQ .PLAYER2
-    ;NO PLAYER
     
-    ;PAINT RECTANGLE PLAYER 1
+    CMP #1,D7 ;MIRA SI ES DE JUGADOR 1
+    BEQ .PLAYER1
+    
+    CMP #2,D7 ;MIRA SI ES JUGADOR 2
+    BEQ .PLAYER2
+    
+    
+    ;NO HAY CELULA
     ;FILL COLOR
     MOVE.B #81,D0
     MOVE.L #CLRBLACK,D1
     TRAP #15
     
-    ;DRAW RECTANGLE
+    ;RECTANGULO
     MOVE.B #87,D0
     MOVE.W D3,D1
     MOVE.W D2,D4    
     
-    ;STEP FORWARD ONE CELL ON A ROW
+    ;SIGUIENTE
     ADD.W #GRDSZCEL,D3
     ADD.W #GRDSZCEL,D4
     TRAP #15
     
-.LOOP_PLAYER:  
-
     
-    DBRA D6, .FILA
+.LOOP_JUGADORES: 
+    DBRA D6, .ROW
+    MOVE.W #GRDXOFF,D3  ;COORDENADA INICIAL X  
     
-    MOVE.W #GRDXOFF,D3            ;INITIAL POSITION GRID X  
     
-    ;CHANGE ROW
     ADD.W #GRDSZCEL,D2              
     
-    MOVE.W  #GRDWIDTH,D6          ; NUMBER OF COLUMNS
+    MOVE.W  #GRDWIDTH,D6 ;N COLUMNAS
     SUBQ.W #1,D6
     
-    DBRA D5, .FILA
+    DBRA D5, .ROW
     JMP .FINAL
 
-.PLAYER1:
+.PLAYER1: ;RECTANGULOS P2
 
-
-    ;PAINT RECTANGLE PLAYER 1
-    ;FILL COLOR
-    MOVE.B #81,D0
+    
+    MOVE.B #81,D0 ;COLOR
     MOVE.L #CLRLTBLU,D1
     TRAP #15
     
-    ;DRAW RECTANGLE
-    MOVE.B #87,D0
+    MOVE.B #87,D0 ;RECTANGULO
     MOVE.W D3,D1
     MOVE.W D2,D4
     
-    ;STEP FORWARD ONE CELL ON A ROW
-    ADD.W #GRDSZCEL,D3
+    ADD.W #GRDSZCEL,D3 ;SIGUIENTE
     ADD.W #GRDSZCEL,D4
     TRAP #15
     
-    ;INCREASE PLAYER1 COUNTER
-    ADDQ.W #1, (A1)
-    JMP .LOOP_PLAYER
+    ADDQ.W #1, (A1) ;AUMENTA CONTADOR DE P1
+    
+    JMP .LOOP_JUGADORES
 
 
-.PLAYER2:
-
-
-    ;PAINT RECTANGLE PLAYER 2
-    ;FILL COLOR
-    MOVE.B #81,D0
+.PLAYER2: ;RECTANGULOS P2
+    
+    MOVE.B #81,D0 ;FILL COLOR
     MOVE.L #CLRLTRED,D1
     TRAP #15
     
     
-    ;RECTANGLE
-    MOVE.B #87,D0
+    MOVE.B #87,D0 ;RECTANGULO
     MOVE.W D3,D1
     MOVE.W D2,D4
     
-    ;STEP FORWARD ONE CELL ON A ROW
-    ADD.W #GRDSZCEL,D3
+    
+    ADD.W #GRDSZCEL,D3 ;SIGUIENTE CELDA
     ADD.W #GRDSZCEL,D4
-    TRAP #15
-    
-    ;INCREASE PLAYER1 COUNTER
-    ADDQ.W #1, (A2)
-    
-    JMP .LOOP_PLAYER
+    TRAP #15    
+    ADDQ.W #1, (A2) ;AUMENTA CONTADOR DE P2
+
+
+    JMP .LOOP_JUGADORES
  
           
-.FINAL:
-
-    ;CONTADORES
+.FINAL: ;CONTADORES
+    
+    ;P1
     MOVE.B #81,D0
     MOVE.L #CLRLTBLU,D1
     TRAP #15
     
-    MOVE.B #95,D0     
-    MOVE.W #GRDSCP1X,D1
-    MOVE.W #GRDSCP1Y,D2
-    LEA GRDNPLR1,A1
+    MOVE.B #11,D0
+    MOVE.W #GRDSCP1X<<8|GRDSCP1Y,D1
     TRAP #15
     
+    MOVE.B #3,D0
+    LEA GRDNPLR1,A1
+    MOVE.W (A1),D2
+    MOVE.L D2,D1
+    TRAP #15
+    
+    ;P2 
     MOVE.B #81,D0
     MOVE.L #CLRLTRED,D1
+    TRAP #15
+    
+    MOVE.B #11,D0
+    MOVE.W #GRDSCP2X<<8|GRDSCP2Y,D1
+    TRAP #15
+    
+    MOVE.B #3,D0
+    LEA GRDNPLR2,A1
+    MOVE.W (A1),D2
+    MOVE.L D2,D1
     TRAP #15
     
     MOVE.B #95,D0
@@ -569,8 +572,19 @@ GRDPLOT
     LEA GRDNPLR2,A1
     TRAP #15
    
+   ;PUNTUACION GLOBAL
     MOVE.B #81,D0
     MOVE.L #CLRDKGRN,D1
+    TRAP #15
+    
+    MOVE.B #11,D0
+    MOVE.W #GRDSCNGX<<8|GRDSCNGY,D1
+    TRAP #15
+    
+    MOVE.B #3,D0
+    LEA GRDNGEN,A1
+    MOVE.W (A1),D2
+    MOVE.L D2,D1
     TRAP #15
     
     MOVE.B #95,D0
@@ -585,6 +599,8 @@ GRDPLOT
  
  
  
+
+
 
 
 
