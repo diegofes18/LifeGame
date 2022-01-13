@@ -266,7 +266,7 @@ FINAL1:
             MOVE.B #87,D0
             MOVE.W 2(A1),D1
             MOVE.W (A1),D2
-            MOVE.W D1,D3
+            MOVE.W D1,D3                               
             ADD.W 6(A1),D3
             MOVE.W D2,D4
             ADD.W 4(A1),D4
@@ -274,21 +274,40 @@ FINAL1:
          
             ;Usamos la tarea 95 del trap #15 para escribir el texto 
             ;correcto en el rectangulo
-            MOVE.B #95,D0
-            MOVE.W 2(A1),D1
-            ADD.W #40,D1
-         
-            MOVE.W (A1),D2
-            ADD.W #15,D2
-         
-            ADD.W #12,A1
-         
-            TRAP #15
+            
+            MOVE.W  2(A1),D1 ;POSX
+
+            ;MITAD ANCHO X
+            MOVE.W 6(A1),D4
+            DIVS.W #2, D4
+            ADD.W D4, D1
+
+            LEA     12(A1),A1
+            JSR     UTLSTRLN                ;TAMAÑO DE LA CADENA DE TEXTO
+            MULS.W  #CHRWIDTH,D0
+            DIVS.W  #2,D0                   ;MITAD ANCHO DEL TEXTO
+            SUB.W   D0,D1
+
+            ADD.W   #13,D2
+            MOVE.B  #95,D0
+            TRAP    #15
+            
+*            MOVE.W 2(A1),D1
+*            ADD.W #40,D1
+*         
+*            MOVE.W (A1),D2
+*            ADD.W #15,D2
+*         
+*            ADD.W #12,A1
+*            
+*            MOVE.B #95,D0
+*            TRAP #15
          
             MOVEM.L (A7)+,D0-D7/A0-A1
             RTS
 
         
+
 
 
 

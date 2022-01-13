@@ -85,7 +85,7 @@ GRDMUPD
            
             DIVS.W #GRDSZCEL,D1
             DIVS.W #GRDSZCEL,D2
-            LEA GRDDST,A0
+            MOVE.L (GRDDST), A0
             MOVE.W D2,D0
             MULS.W #GRDWIDTH,D0
             ADD.W D1,D0
@@ -145,34 +145,407 @@ GRDRUPD
 ; -----------------------------------------------------------------------------
 
 ; TODO : PLACE YOUR CODE HERE
-;D0:COLUMNA VECINO, D1:CONTADOR ITERACION, D2:CELL VALUE, D3:NP1 ,D4:NP2, D5:FILA VECINA, 
-;D6:AUXILIAR PARA MOVIMIENTOS, D7:NUM CASILLAS
-        MOVEM.L D0-D7/A0,-(A7)
-        
-        ADDQ.W #1,(GRDNGEN)
-        MOVE.L #GRDDST,A1
-        MOVE.L #GRDSRC,(GRDDST)
-        MOVE.L A1,(GRDSRC)
-        
-        MOVE.L #GRDSRC,A0
-        
-        CLR D1
-        MOVE.W #$FFFFFFFF,D1
-        
-        MOVE.W #GRDWIDTH,D6
-        MULU #GRDHEIGH,D6
-        SUB.W #1,D6
-        
-.BUCLE:
+;D0:CONTENIDO CASILLA, D1:PUNTERO CASILLA, D2:FILA, D3:COLUMNA ,D4:NP1, D5:FILA VECINA, 
+;D6:COLUMNA VECINA, D7:NP2
       
+            
+    MOVEM.L D0-D7/A0-A1, -(A7)
+    
+    ;ADD 1 TO THE NUMBER OF GENERTAIONS
+    ADDQ.W #1,(GRDNGEN)
+    
+    ;SWITCH MATRIX POINTERS    
+    MOVE.L  (GRDSRC), A0
+    MOVE.L  (GRDDST), A1
+    MOVE.L  A0, (GRDDST)
+    MOVE.L  A1, (GRDSRC)
+    
+    
+    
+    MOVE.L #0,D1        ;INICIALIZAR INDICE CASILLA
+    
 
-.FINAL:
-        MOVEM.L (A7)+,D0-D7/A0
-        RTS
+.LOOP:
+    MOVE.W D1,D2
+    MOVE.W D1,D3
+    LSR.W #GRDSHWID,D2     ;FILAS
+    AND.W #GRDMSWID,D3     ;COLUMNAS
+    
+
+    MOVE.W D2,D5           ;SACAR FILA VECINO
+    MOVE.W D3,D6           ;SACAR COLUMNA VECINO
+    
+    ;VECINO ARRIBA
+    CLR.W D4
+    CLR.W D7
+    
+    ;MODULO
+    SUBQ.W #1,D5
+    AND.W #GRDMSHEI,D5
+    LSL.W #GRDSHWID,D5
+    ADD.W D6,D5
+    CLR.W D6
+    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO  
+    
+    CMP.W #1,D6
+    BNE .P2_1
+    ADD.W #1,D4             ;CONTADOR P1
+    JMP .NEIGHBOR_DOWN
+    
+.P2_1
+
+    CMP.W #2,D6
+    BNE .NEIGHBOR_DOWN
+    ADD.W #1,D7             ;CONTADOR P2
+       
+.NEIGHBOR_DOWN
+
+    MOVE.W D2,D5
+    MOVE.W D3,D6
+    
+    ;VECINO ABAJO
+    ;MODULO
+    ADDQ.W #1,D5
+    AND.W #GRDMSHEI,D5
+    LSL.W #GRDSHWID,D5
+    ADD.W D6,D5
+    CLR.W D6
+    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO 
+    
+    CMP.W #1,D6
+    BNE .P2_2
+    ADD.W #1,D4             ;CONTADOR P1
+    JMP .NEIGHBOR_LEFT
+    
+.P2_2
+
+    CMP.W #2,D6
+    BNE .NEIGHBOR_LEFT
+    ADD.W #1,D7             ;CONTADOR P2
+       
+.NEIGHBOR_LEFT       
+    
+    MOVE.W D2,D5
+    MOVE.W D3,D6
+    
+    ;VECINO IZQUIERDA
+    ;MODULO
+    SUBQ.W #1,D6
+    AND.W #GRDMSWID,D6
+    LSL.W #GRDSHWID,D5
+    ADD.W D5,D6
+    MOVE.L D6,D5
+    CLR.W D6
+    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO 
+    
+    CMP.W #1,D6
+    BNE .P2_3
+    ADD.W #1,D4             ;CONTADOR P1
+    JMP .NEIGHBOR_RIGHT
+    
+.P2_3
+
+    CMP.W #2,D6
+    BNE .NEIGHBOR_RIGHT
+    ADD.W #1,D7             ;CONTADOR P2
+       
+.NEIGHBOR_RIGHT       
+
+    MOVE.W D2,D5
+    MOVE.W D3,D6
+    
+    ;VECINO DERECHA
+    ;MODULO
+    ADDQ.W #1,D6
+    AND.W #GRDMSWID,D6
+    LSL.W #GRDSHWID,D5
+    ADD.W D5,D6
+    MOVE.L D6,D5
+    CLR.W D6
+    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO
+    
+    CMP.W #1,D6
+    BNE .P2_4
+    ADD.W #1,D4             ;CONTADOR P1
+    JMP .NEIGHBOR_UPL
+    
+.P2_4
+
+    CMP.W #2,D6
+    BNE .NEIGHBOR_UPL
+    ADD.W #1,D7             ;CONTADOR P2
+       
+.NEIGHBOR_UPL
+
+    MOVE.W D2,D5
+    MOVE.W D3,D6
+    
+    ;VECINO ARRIBA IZQUIERDA
+    ;MODULO
+    SUBQ.W #1,D6
+    SUBQ.W #1,D5
+    AND.W #GRDMSWID,D6
+    AND.W #GRDMSHEI,D5
+    LSL.W #GRDSHWID,D5
+    ADD.W D5,D6
+    MOVE.L D6,D5
+    CLR.W D6
+    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO
+    
+    CMP.W #1,D6
+    BNE .P2_5
+    ADD.W #1,D4             ;CONTADOR P1
+    JMP .NEIGHBOR_UPR
+    
+.P2_5
+
+    CMP.W #2,D6
+    BNE .NEIGHBOR_UPR
+    ADD.W #1,D7             ;CONTADOR P2
+       
+.NEIGHBOR_UPR
+
+    MOVE.W D2,D5
+    MOVE.W D3,D6
+    
+    ;VECINO ESQUINA DERECHA
+    ;MODULO
+    ADDQ.W #1,D6
+    SUBQ.W #1,D5
+    AND.W #GRDMSWID,D6
+    AND.W #GRDMSHEI,D5
+    LSL.W #GRDSHWID,D5
+    ADD.W D5,D6
+    MOVE.L D6,D5
+    CLR.W D6
+    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO
+    
+    CMP.W #1,D6
+    BNE .P2_6
+    ADD.W #1,D4             ;CONTADOR P1
+    JMP .NEIGHBOR_DOWNL
+    
+.P2_6
+
+    CMP.W #2,D6
+    BNE .NEIGHBOR_DOWNL
+    ADD.W #1,D7             ;CONTADOR P2
+
+.NEIGHBOR_DOWNL 
+
+    MOVE.W D2,D5
+    MOVE.W D3,D6
+    
+    ;VECINO ABAJO IZQUIERDA
+    ;MODULO
+    SUBQ.W #1,D6
+    ADDQ.W #1,D5
+    AND.W #GRDMSWID,D6
+    AND.W #GRDMSHEI,D5
+    LSL.W #GRDSHWID,D5
+    ADD.W D5,D6
+    MOVE.L D6,D5
+    CLR.W D6
+    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO
+    
+    CMP.W #1,D6
+    BNE .P2_7
+    ADD.W #1,D4             ;CONTADOR P1
+    JMP .NEIGHBOR_DOWNR
+    
+.P2_7
+
+    CMP.W #2,D6
+    BNE .NEIGHBOR_DOWNR
+    ADD.W #1,D7             ;CONTADOR P2
+    
+.NEIGHBOR_DOWNR    
+
+    MOVE.W D2,D5
+    MOVE.W D3,D6
+    
+    ;VECINO ABAJO DERECHA
+    ;MODULO
+    ADDQ.W #1,D6
+    ADDQ.W #1,D5
+    AND.W #GRDMSWID,D6
+    AND.W #GRDMSHEI,D5
+    LSL.W #GRDSHWID,D5
+    ADD.W D5,D6
+    MOVE.L D6,D5
+    CLR.W D6
+    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO
+    
+    CMP.W #1,D6
+    BNE .P2_8
+    ADD.W #1,D4             ;CONTADOR P1
+    JMP .SWITCH
+    
+.P2_8
+
+    CMP.W #2,D6
+    BNE .SWITCH
+    ADD.W #1,D7             ;CONTADOR P2
+    
+    
+.SWITCH:
+    MOVE.B (A1,D1),D0
+    CMP #1,D0
+    BEQ .SURVIVAL
+    CMP #2,D0
+    BEQ .SURVIVAL2
+    BNE .BIRTH
+ 
+
+    ;SURVIVAL RULES FOR PLAYER1 CELL
+.SURVIVAL:
+
+    MOVE.W D4,D0
+    SUB.W D7,D0
+    CMP.W #2,D0
+    BNE .OR_1
+    MOVE.B #1,(A0,D1)
+    JMP .FINAL
+
+.OR_1
+
+    CMP.W #3,D0
+    BNE .SECOND_IF_1
+    MOVE.B #1,(A0,D1)
+    JMP .FINAL
+    
+.SECOND_IF_1:
+
+    CMP.W #1,D0
+    BEQ .AND_1
+    MOVE.B #0,(A0,D1)
+    JMP .FINAL
         
-NOT_32   EQU %0111111
-NOT_64   EQU %01111111 ;PARA HACER EL MODULO DE 64
-NOT_2048 EQU %011111111111 ;PARA HACER EL MODULO DE 2048
+    
+    
+.AND_1:
+
+    CMP #2,D4
+    BGE .NEW_VALUE_1
+    MOVE.B #0,(A0,D1)
+    JMP .FINAL
+    
+    
+    
+     
+.NEW_VALUE_1:
+
+    MOVE.B #1,(A0,D1)
+    JMP .FINAL
+
+    
+
+
+    ;SURVIVAL RULES FOR PLAYER2 CELL
+.SURVIVAL2:
+    MOVE.W D7,D0
+    SUB.W D4,D0
+    CMP.W #2,D0
+    BNE .OR_2
+    MOVE.B #2,(A0,D1)
+    JMP .FINAL
+
+.OR_2
+
+    CMP.W #3,D0
+    BNE .SECOND_IF_2
+    MOVE.B #2,(A0,D1)
+    JMP .FINAL
+    
+    
+.SECOND_IF_2:
+
+    CMP.W #1,D0
+    BEQ .AND_2
+    MOVE.B #0,(A0,D1)
+    JMP .FINAL
+        
+    
+    
+.AND_2:
+
+    CMP #2,D7
+    BGE .NEW_VALUE_2
+    MOVE.B #0,(A0,D1)
+    JMP .FINAL
+ 
+     
+.NEW_VALUE_2:
+
+    MOVE.B #2,(A0,D1)
+    JMP .FINAL
+
+
+    ;BIRTH RULE FOR NONE PLAYER CELL   
+.BIRTH:
+
+    CMP #3,D4
+    BEQ .NP1
+    JMP .SEC_COND
+    
+.NP1:
+
+    CMP #3,D7
+    BNE .P1_BORN
+    JMP .SEC_COND
+    
+.P1_BORN
+
+    MOVE.B #1,(A0,D1)    
+    JMP .FINAL
+    
+.SEC_COND
+
+    CMP #3,D7
+    BEQ .NP2
+    JMP .SAME
+.NP2
+
+    CMP #3,D4
+    BNE .P2_BORN
+    JMP .SAME
+    
+.P2_BORN
+
+    MOVE.B #2,(A0,D1)
+    JMP .FINAL
+    
+.SAME:
+
+    CMP #3,D4
+    BNE .VACIO
+    CMP #3,D7
+    BNE .VACIO
+    
+    MOVE.L D1,D2
+    
+    JSR UTLRAND    
+    ;D1 RANDOM VALUE
+    
+    MOVE.B D1,(A0,D2)
+    
+    MOVE.W D2,D1
+    
+.VACIO: MOVE.B #0,(A0,D1)
+    
+.FINAL:
+
+    ADDQ.W #1,D1
+    
+    CMP.W #GRDWIDTH*GRDHEIGH,D1    
+    BNE .LOOP
+    
+    MOVEM.L (A7)+, D0-D7/A0-A1
+
+    RTS
+
+
+           
 
 ; -----------------------------------------------------------------------------
 GRDSAVE
@@ -422,183 +795,298 @@ GRDPLOT
 
 ; TODO : PLACE YOUR CODE HERE
 
-    MOVEM.L D0-D6/A0-A3, -(A7)
+   MOVEM.L D0-D6/A0-A3, -(A7)
     
-    LEA GRDDST, A0      ;A0: PUNTERO A DONDE SE ESCRIBE
+    MOVE.L (GRDDST), A0            ; A0: POINTER TO THE DATA TO READ
     LEA GRDNPLR1, A1
     LEA GRDNPLR2, A2
-    MOVE.W #0,(A1)
-    MOVE.W #0,(A2)    
-    
-    MOVE.W  #GRDHEIGH,D5 ;N FILAS
-    SUBQ.W #1,D5
-    
-    MOVE.W  #GRDWIDTH,D6 ;N COLUMNAS
-    SUBQ.W #1,D6
+    CLR.W (A1)
+    CLR.W (A2)
     
     
-    ;VERDE
+    ;GREEN PEN
     MOVE.B #80,D0
     MOVE.L #CLRDKGRN,D1
     TRAP #15
+
   
-    ;ANCHURA
+    ;CHANGE WIDTH OF PEN
     MOVE.B #93,D0
     MOVE.B #2,D1
     TRAP #15
     
-    MOVE.W #GRDYOFF, D2     ;CORDENADA INICIAL Y
-    MOVE.W #GRDXOFF, D3     ;COORDENADA INICIAL X
+    ;PAINT GRID
+    
+    MOVE.W  #GRDHEIGH,D5          ; NUMBER OF ROWS
+    MOVE.W  #GRDWIDTH,D6          ; NUMBER OF COLUMNS
+    
+    MOVE.W #GRDYOFF,D2
+.FILAS
+    
+    MOVE.B #84,D0
+    MOVE.W #GRDXOFF,D1
+    MOVE.W #GRDPXWID,D3
+    ADD.W #GRDXOFF,D3
+    MOVE.W D2,D4
+    TRAP #15
+    
+    ADD.W #GRDSZCEL,D2
+    
+    DBRA D5,.FILAS
+    
+    MOVE.W #GRDXOFF,D1
+.COLUMNAS
+        
+    MOVE.B #84,D0
+    MOVE.W #GRDYOFF,D2
+    MOVE.W D1,D3
+    MOVE.W #GRDPXHEI,D4
+    ADD.W #GRDYOFF,D4
+    TRAP #15
+    
+    ADD.W #GRDSZCEL,D1
+    
+    DBRA D6,.COLUMNAS
+    
+    
+    ;PAINT P1 AND P2 CELLS
+        
+    MOVE.W  #GRDHEIGH,D5          ; NUMBER OF ROWS
+    SUBQ.W #1,D5
+    
+    MOVE.W  #GRDWIDTH,D6          ; NUMBER OF COLUMNS
+    SUBQ.W #1,D6
     
     
     
-.ROW:
+    MOVE.W #GRDXOFF, D3
+    MOVE.W #GRDYOFF, D2
+    
+    
+.FILA:
     
     MOVE.B (A0)+,D7
-    
-    CMP #1,D7 ;MIRA SI ES DE JUGADOR 1
-    BEQ .PLAYER1
-    
-    CMP #2,D7 ;MIRA SI ES JUGADOR 2
-    BEQ .PLAYER2
-    
-    
-    ;NO HAY CELULA
+   
+    ;PAINT RECTANGLE PLAYER 1
     ;FILL COLOR
     MOVE.B #81,D0
     MOVE.L #CLRBLACK,D1
     TRAP #15
     
-    ;RECTANGULO
+    ;PLAYER 1
+    CMP #1,D7
+    BEQ .PLAYER1
+    ;PLAYER 2?
+    CMP #2,D7
+    BEQ .PLAYER2
+    ;NO PLAYER
+   
+    ADD.W #GRDSZCEL,D3
+    ADD.W #GRDSZCEL,D4
+        
+.LOOP_PLAYER:  
+
+    
+    DBRA D6, .FILA
+    
+    MOVE.W #GRDXOFF,D3
+    ADD.W #GRDSZCEL,D2
+    
+    MOVE.W  #GRDWIDTH,D6          ; NUMBER OF COLUMNS
+    SUBQ.W #1,D6
+    
+    DBRA D5, .FILA
+    JMP .FINAL
+
+.PLAYER1:
+
+
+    ;PAINT RECTANGLE PLAYER 1
+    ;FILL COLOR
+    MOVE.B #81,D0
+    MOVE.L #CLRLTBLU,D1
+    TRAP #15
+    
+    ;RECTANGLE
     MOVE.B #87,D0
     MOVE.W D3,D1
-    MOVE.W D2,D4    
+    MOVE.W D2,D4
     
-    ;SIGUIENTE
     ADD.W #GRDSZCEL,D3
     ADD.W #GRDSZCEL,D4
     TRAP #15
     
-    
-.LOOP_JUGADORES: 
-    DBRA D6, .ROW
-    MOVE.W #GRDXOFF,D3  ;COORDENADA INICIAL X  
-    
-    
-    ADD.W #GRDSZCEL,D2              
-    
-    MOVE.W  #GRDWIDTH,D6 ;N COLUMNAS
-    SUBQ.W #1,D6
-    
-    DBRA D5, .ROW
-    JMP .FINAL
-
-.PLAYER1: ;RECTANGULOS P2
-
-    
-    MOVE.B #81,D0 ;COLOR
-    MOVE.L #CLRLTBLU,D1
-    TRAP #15
-    
-    MOVE.B #87,D0 ;RECTANGULO
-    MOVE.W D3,D1
-    MOVE.W D2,D4
-    
-    ADD.W #GRDSZCEL,D3 ;SIGUIENTE
-    ADD.W #GRDSZCEL,D4
-    TRAP #15
-    
-    ADDQ.W #1, (A1) ;AUMENTA CONTADOR DE P1
-    
-    JMP .LOOP_JUGADORES
+    ADDQ.W #1, (A1)
+    JMP .LOOP_PLAYER
 
 
-.PLAYER2: ;RECTANGULOS P2
-    
-    MOVE.B #81,D0 ;FILL COLOR
+.PLAYER2:
+
+
+    ;PAINT RECTANGLE PLAYER 2
+    ;FILL COLOR
+    MOVE.B #81,D0
     MOVE.L #CLRLTRED,D1
     TRAP #15
     
     
-    MOVE.B #87,D0 ;RECTANGULO
+    ;RECTANGLE
+    MOVE.B #87,D0
     MOVE.W D3,D1
     MOVE.W D2,D4
     
-    
-    ADD.W #GRDSZCEL,D3 ;SIGUIENTE CELDA
+
+    ADD.W #GRDSZCEL,D3
     ADD.W #GRDSZCEL,D4
-    TRAP #15    
-    ADDQ.W #1, (A2) ;AUMENTA CONTADOR DE P2
-
-
-    JMP .LOOP_JUGADORES
+    
+    TRAP #15
+    
+    ADDQ.W #1, (A2)
+    
+    JMP .LOOP_PLAYER
  
           
-.FINAL: ;CONTADORES
+.FINAL:
+
+    MOVE.W (GRDNPLR1),D3
+    MOVE.W (GRDNPLR2),D4
     
-    ;P1
+    CMP.W D3,D4
+    BLT .P1_WINS
+    BGT .P2_WINS
+    BEQ .SAME
+    
+    
+.SAME
+
+    MOVE.B #81,D0
+    MOVE.L #CLRLTRED,D1
+    TRAP #15    
+    
+    CLR D1
+    
+    MOVE.B #11,D0
+    MOVE.W #GRDSCP2X<<8|GRDSCP2Y-1,D1
+    TRAP #15
+
+    MOVE.B #6,D0
+    MOVE.B #42,D1
+    TRAP #15
+    
+    MOVE.B #81,D0
+    MOVE.L #CLRLTBLU,D1
+    TRAP #15       
+    
+    CLR D1
+    
+    MOVE.B #11,D0
+    MOVE.W #GRDSCP1X<<8|GRDSCP1Y-1,D1
+    TRAP #15    
+    
+    MOVE.B #6,D0
+    MOVE.B #42,D1
+    TRAP #15
+    
+    JMP .SCORES        
+    
+.P2_WINS
+    
+    MOVE.B #81,D0
+    MOVE.L #CLRLTRED,D1
+    TRAP #15    
+    
+    MOVE.B #11,D0
+    MOVE.W #GRDSCP2X<<8|GRDSCP2Y-1,D1
+    TRAP #15
+    
+    MOVE.B #6,D0
+    MOVE.B #42,D1
+    TRAP #15
+    
+    JMP .SCORES
+    
+.P1_WINS:
+
     MOVE.B #81,D0
     MOVE.L #CLRLTBLU,D1
     TRAP #15
+  
+    MOVE.B #11,D0
+    MOVE.W #GRDSCP1X<<8|GRDSCP1Y-1,D1
+    TRAP #15
+    
+    MOVE.B #6,D0
+    MOVE.B #42,D1
+    TRAP #15
+    
+.SCORES:    
+    ;SCORES
+    ;SCORE PLAYER 1
+    MOVE.B #81,D0
+    MOVE.L #CLRLTBLU,D1
+    TRAP #15
+    
+    CLR D1
     
     MOVE.B #11,D0
     MOVE.W #GRDSCP1X<<8|GRDSCP1Y,D1
     TRAP #15
     
-    MOVE.B #3,D0
+    
+    MOVE.B #3,D0     
     LEA GRDNPLR1,A1
     MOVE.W (A1),D2
     MOVE.L D2,D1
     TRAP #15
     
-    ;P2 
+    
+    ;SCORE PLAYER 2
     MOVE.B #81,D0
     MOVE.L #CLRLTRED,D1
     TRAP #15
+    
+    CLR D1
     
     MOVE.B #11,D0
     MOVE.W #GRDSCP2X<<8|GRDSCP2Y,D1
     TRAP #15
     
-    MOVE.B #3,D0
+    MOVE.B #3,D0     
     LEA GRDNPLR2,A1
     MOVE.W (A1),D2
     MOVE.L D2,D1
     TRAP #15
-    
-    MOVE.B #95,D0
-    MOVE.W #GRDSCP2X,D1
-    MOVE.W #GRDSCP2Y,D2
-    LEA GRDNPLR2,A1
-    TRAP #15
    
-   ;PUNTUACION GLOBAL
+    ;SCORE GENERATIONS
     MOVE.B #81,D0
-    MOVE.L #CLRDKGRN,D1
+    MOVE.L #CLRLTGRN,D1
     TRAP #15
+    
     
     MOVE.B #11,D0
     MOVE.W #GRDSCNGX<<8|GRDSCNGY,D1
     TRAP #15
     
-    MOVE.B #3,D0
+    
+    MOVE.B #3,D0     
     LEA GRDNGEN,A1
     MOVE.W (A1),D2
     MOVE.L D2,D1
     TRAP #15
-    
-    MOVE.B #95,D0
-    MOVE.W #GRDSCNGX,D1
-    MOVE.W #GRDSCNGY,D2
-    LEA GRDNGEN,A1
-    TRAP #15
 
     MOVEM.L  (A7)+, D0-D6/A0-A3
     RTS
+
  
  
  
  
+
+
+
+
+
+
 
 
 
@@ -620,6 +1108,6 @@ GRDPLOT
 
 
 *~Font name~Courier New~
-*~Font size~10~
+*~Font size~11~
 *~Tab type~1~
 *~Tab size~4~
