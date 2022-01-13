@@ -145,13 +145,16 @@ GRDRUPD
 ; -----------------------------------------------------------------------------
 
 ; TODO : PLACE YOUR CODE HERE
-;D0:CONTENIDO CASILLA, D1:PUNTERO CASILLA, D2:FILA, D3:COLUMNA ,D4:NP1, D5:FILA VECINA, 
-;D6:COLUMNA VECINA, D7:NP2
+
+;D0:CONTENIDO CASILLA, D1:PUNTERO CASILLA, D2:FILA, D3:COLUMNA ,
+;D4:FILA VECINO, D5:COLUMNA VECINO Y CONTENIDO VECINO, D6:NP1,
+;D7:NP2
+
       
             
     MOVEM.L D0-D7/A0-A1, -(A7)
     
-    ;ADD 1 TO THE NUMBER OF GENERTAIONS
+    ;AUMENTAMOS EL NUMERO DE GENERACIONES
     ADDQ.W #1,(GRDNGEN)
     
     ;SWITCH MATRIX POINTERS    
@@ -160,386 +163,363 @@ GRDRUPD
     MOVE.L  A0, (GRDDST)
     MOVE.L  A1, (GRDSRC)
     
-    
-    
-    MOVE.L #0,D1        ;INICIALIZAR INDICE CASILLA
+    CLR.L D1        ;INDICE DE LA MATRIZ
     
 
-.LOOP:
+.BUCLE_PRINCIPAL:
+    
     MOVE.W D1,D2
     MOVE.W D1,D3
-    LSR.W #GRDSHWID,D2     ;FILAS
-    AND.W #GRDMSWID,D3     ;COLUMNAS
+    LSR.W #GRDSHWID,D2     ;OBTENEMOS FILAS
+    AND.W #GRDMSWID,D3     ;OBTENEMOS COLUMNAS
     
-
-    MOVE.W D2,D5           ;SACAR FILA VECINO
-    MOVE.W D3,D6           ;SACAR COLUMNA VECINO
+;GUARDAMOS COORDENADAS DE LA CASILLA
+    MOVE.W D2,D4           
+    MOVE.W D3,D5           
     
-    ;VECINO ARRIBA
-    CLR.W D4
+;------------VECINO ARRIBA-------------------
+    CLR.W D6
     CLR.W D7
     
-    ;MODULO
-    SUBQ.W #1,D5
-    AND.W #GRDMSHEI,D5
-    LSL.W #GRDSHWID,D5
-    ADD.W D6,D5
-    CLR.W D6
-    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO  
-    
-    CMP.W #1,D6
+    SUBQ.W #1,D4    ;VECINO ARRIBA
+    AND.W #GRDMSHEI,D4    ;MODULO
+    LSL.W #GRDSHWID,D4
+    ADD.W D5,D4           ;OBTENGO INDICE VECINO EN D4
+    CLR.W D5
+    MOVE.B (A1,D4),D5       ;VALOR CELDA VECINO  
+    ;AUMENTAMOS NP1 O NP2 
+    CMP.W #1,D5
     BNE .P2_1
-    ADD.W #1,D4             ;CONTADOR P1
-    JMP .NEIGHBOR_DOWN
+    ADD.W #1,D6             ;AUMENTO NP1
+    JMP .DOWN
     
 .P2_1
 
-    CMP.W #2,D6
-    BNE .NEIGHBOR_DOWN
-    ADD.W #1,D7             ;CONTADOR P2
-       
-.NEIGHBOR_DOWN
+    CMP.W #2,D5
+    BNE .DOWN
+    ADD.W #1,D7             ;AUMENTO NP2
 
-    MOVE.W D2,D5
-    MOVE.W D3,D6
+;---------------VECINO ABAJO---------------------      
+.DOWN
+
+    MOVE.W D2,D4
+    MOVE.W D3,D5
     
-    ;VECINO ABAJO
-    ;MODULO
-    ADDQ.W #1,D5
-    AND.W #GRDMSHEI,D5
-    LSL.W #GRDSHWID,D5
-    ADD.W D6,D5
-    CLR.W D6
-    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO 
-    
-    CMP.W #1,D6
+    ADDQ.W #1,D4       ;VECINO ABAJO
+    AND.W #GRDMSHEI,D4 ;MODULO FILAS VECINO
+    LSL.W #GRDSHWID,D4
+    ADD.W D5,D4         ;OBTENGO INDICE VECINO EN D4
+    CLR.W D5
+    MOVE.B (A1,D4),D5       ;VALOR CELDA VECINO 
+;AUMENTO NP1 O NP2    
+    CMP.W #1,D5
     BNE .P2_2
-    ADD.W #1,D4             ;CONTADOR P1
-    JMP .NEIGHBOR_LEFT
+    ADD.W #1,D6             ;AUMENTO NP1
+    JMP .RIGHT
     
 .P2_2
 
-    CMP.W #2,D6
-    BNE .NEIGHBOR_LEFT
-    ADD.W #1,D7             ;CONTADOR P2
-       
-.NEIGHBOR_LEFT       
-    
-    MOVE.W D2,D5
-    MOVE.W D3,D6
-    
-    ;VECINO IZQUIERDA
-    ;MODULO
-    SUBQ.W #1,D6
-    AND.W #GRDMSWID,D6
-    LSL.W #GRDSHWID,D5
-    ADD.W D5,D6
-    MOVE.L D6,D5
-    CLR.W D6
-    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO 
-    
-    CMP.W #1,D6
-    BNE .P2_3
-    ADD.W #1,D4             ;CONTADOR P1
-    JMP .NEIGHBOR_RIGHT
-    
-.P2_3
+    CMP.W #2,D5
+    BNE .RIGHT
+    ADD.W #1,D7             ;AUMENTO NP2
 
-    CMP.W #2,D6
-    BNE .NEIGHBOR_RIGHT
-    ADD.W #1,D7             ;CONTADOR P2
-       
-.NEIGHBOR_RIGHT       
 
-    MOVE.W D2,D5
-    MOVE.W D3,D6
+;------------VECINO DERECHA-------------------------      
+.RIGHT       
+
+    MOVE.W D2,D4
+    MOVE.W D3,D5
     
-    ;VECINO DERECHA
-    ;MODULO
-    ADDQ.W #1,D6
-    AND.W #GRDMSWID,D6
-    LSL.W #GRDSHWID,D5
-    ADD.W D5,D6
-    MOVE.L D6,D5
-    CLR.W D6
-    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO
+    ADDQ.W #1,D5
+    AND.W #GRDMSWID,D5  ;MODULO
+    LSL.W #GRDSHWID,D4
+    ADD.W D4,D5
+    MOVE.L D5,D4           ;INDICE VECINO EN D4
+    CLR.W D5
+    MOVE.B (A1,D4),D5       ;VALOR CELDA VECINO EN D5
     
-    CMP.W #1,D6
+    CMP.W #1,D5
     BNE .P2_4
-    ADD.W #1,D4             ;CONTADOR P1
-    JMP .NEIGHBOR_UPL
+    ADD.W #1,D6             ;AUMENTO NP1
+    JMP .LEFT
     
 .P2_4
 
-    CMP.W #2,D6
-    BNE .NEIGHBOR_UPL
-    ADD.W #1,D7             ;CONTADOR P2
-       
-.NEIGHBOR_UPL
+    CMP.W #2,D5
+    BNE .LEFT
+    ADD.W #1,D7             ;AUMENTO NP2
+    
 
-    MOVE.W D2,D5
-    MOVE.W D3,D6
+;-----------VECINO IZQUIERDA--------------       
+.LEFT       
     
-    ;VECINO ARRIBA IZQUIERDA
-    ;MODULO
-    SUBQ.W #1,D6
-    SUBQ.W #1,D5
-    AND.W #GRDMSWID,D6
-    AND.W #GRDMSHEI,D5
-    LSL.W #GRDSHWID,D5
-    ADD.W D5,D6
-    MOVE.L D6,D5
-    CLR.W D6
-    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO
-    
-    CMP.W #1,D6
-    BNE .P2_5
-    ADD.W #1,D4             ;CONTADOR P1
-    JMP .NEIGHBOR_UPR
-    
-.P2_5
+    MOVE.W D2,D4
+    MOVE.W D3,D5
 
-    CMP.W #2,D6
-    BNE .NEIGHBOR_UPR
-    ADD.W #1,D7             ;CONTADOR P2
-       
-.NEIGHBOR_UPR
+    
+    SUBQ.W #1,D5         ;RESTO COLUMNA PARA VECINO IZQUIERDA
+    AND.W #GRDMSWID,D5   ;MODULO
+    LSL.W #GRDSHWID,D4
+    ADD.W D4,D5
+    MOVE.L D5,D4          ;OBTENGO INDICE DE VECINO EN D4
+    CLR.W D5
+    MOVE.B (A1,D4),D5     ;VALOR CELDA VECINO EN D5 
+;AUMENTAMOS NP1 O NP2    
+    CMP.W #1,D5
+    BNE .P2_3
+    ADD.W #1,D6             ;AUMENTO NP1
+    JMP .UPR
+    
+.P2_3
 
-    MOVE.W D2,D5
-    MOVE.W D3,D6
+    CMP.W #2,D5
+    BNE .UPR
+    ADD.W #1,D7             ;AUMENTO NP2
     
-    ;VECINO ESQUINA DERECHA
-    ;MODULO
-    ADDQ.W #1,D6
-    SUBQ.W #1,D5
-    AND.W #GRDMSWID,D6
-    AND.W #GRDMSHEI,D5
-    LSL.W #GRDSHWID,D5
-    ADD.W D5,D6
-    MOVE.L D6,D5
-    CLR.W D6
-    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO
+;--------------VECINO ARRIBA DERECHO------------------       
+.UPR
+
+    MOVE.W D2,D4
+    MOVE.W D3,D5
+
+    ADDQ.W #1,D5
+    SUBQ.W #1,D4
+    ;MODULOS FILAS Y COLUMNAS VECINO
+    AND.W #GRDMSWID,D5
+    AND.W #GRDMSHEI,D4
+    LSL.W #GRDSHWID,D4
+    ADD.W D4,D5
+    MOVE.L D5,D4            ;INDICE VECINO EN D4
+    CLR.W D5
+    MOVE.B (A1,D4),D5       ;VALOR CELDA VECINO EN D5
     
-    CMP.W #1,D6
+    CMP.W #1,D5
     BNE .P2_6
-    ADD.W #1,D4             ;CONTADOR P1
-    JMP .NEIGHBOR_DOWNL
+    ADD.W #1,D6             ;AUMENTO NP1
+    JMP .UPL
     
 .P2_6
 
-    CMP.W #2,D6
-    BNE .NEIGHBOR_DOWNL
-    ADD.W #1,D7             ;CONTADOR P2
+    CMP.W #2,D5
+    BNE .UPL
+    ADD.W #1,D7             ;AUMENTO NP2
 
-.NEIGHBOR_DOWNL 
+;-------------VECINO ARRIBA IZQUIERDA---------------       
+.UPL
 
-    MOVE.W D2,D5
-    MOVE.W D3,D6
+    MOVE.W D2,D4
+    MOVE.W D3,D5
+
+    SUBQ.W #1,D5
+    SUBQ.W #1,D4
+    ;MODULOS FILAS Y COLUMNAS
+    AND.W #GRDMSWID,D5
+    AND.W #GRDMSHEI,D4
+    LSL.W #GRDSHWID,D4
+    ADD.W D4,D5
+    MOVE.L D5,D4            ;INDICE A CELDA VECINO
+    CLR.W D5
+    MOVE.B (A1,D4),D5       ;VALOR CELDA VECINO EN D5
     
-    ;VECINO ABAJO IZQUIERDA
-    ;MODULO
-    SUBQ.W #1,D6
-    ADDQ.W #1,D5
-    AND.W #GRDMSWID,D6
-    AND.W #GRDMSHEI,D5
-    LSL.W #GRDSHWID,D5
-    ADD.W D5,D6
-    MOVE.L D6,D5
-    CLR.W D6
-    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO
+    CMP.W #1,D5
+    BNE .P2_5
+    ADD.W #1,D6             ;AUMENTO NP1
+    JMP .DOWNL
     
-    CMP.W #1,D6
+.P2_5
+
+    CMP.W #2,D5
+    BNE .DOWNL
+    ADD.W #1,D7             ;AUMENTO NP2
+
+
+
+;-------------VECINO ABAJO IZQUIERDA-----------------
+.DOWNL 
+
+    MOVE.W D2,D4
+    MOVE.W D3,D5
+
+    ;OBTENEMOS FILAS Y COLUMNAS VECINO
+    SUBQ.W #1,D5
+    ADDQ.W #1,D4
+    ;MODULOS FILAS Y COLUMNAS VECINO
+    AND.W #GRDMSWID,D5
+    AND.W #GRDMSHEI,D4
+    LSL.W #GRDSHWID,D4
+    ADD.W D4,D5
+    MOVE.L D5,D4            ;INDICE VECINO EN D4
+    CLR.W D5
+    MOVE.B (A1,D4),D5       ;VALOR CELDA VECINO EN D5
+    
+    CMP.W #1,D5
     BNE .P2_7
-    ADD.W #1,D4             ;CONTADOR P1
-    JMP .NEIGHBOR_DOWNR
+    ADD.W #1,D6             ;AUMENTO NP1
+    JMP .DOWNR
     
 .P2_7
 
-    CMP.W #2,D6
-    BNE .NEIGHBOR_DOWNR
-    ADD.W #1,D7             ;CONTADOR P2
-    
-.NEIGHBOR_DOWNR    
+    CMP.W #2,D5
+    BNE .DOWNR
+    ADD.W #1,D7             ;AUMENTO NP2
 
-    MOVE.W D2,D5
-    MOVE.W D3,D6
+;----------------VECINO ABAJO DERECHA---------------------    
+.DOWNR    
+
+    MOVE.W D2,D4
+    MOVE.W D3,D5
+
     
-    ;VECINO ABAJO DERECHA
-    ;MODULO
-    ADDQ.W #1,D6
     ADDQ.W #1,D5
-    AND.W #GRDMSWID,D6
-    AND.W #GRDMSHEI,D5
-    LSL.W #GRDSHWID,D5
-    ADD.W D5,D6
-    MOVE.L D6,D5
-    CLR.W D6
-    MOVE.B (A1,D5),D6       ;VALOR CELDA VECINO
+    ADDQ.W #1,D4
+    ;MODULOS DE FILAS Y COLUMNAS
+    AND.W #GRDMSWID,D5
+    AND.W #GRDMSHEI,D4
+    LSL.W #GRDSHWID,D4
+    ADD.W D4,D5
+    MOVE.L D5,D4 ;INDICE VECINO EN D4
+    CLR.W D5
+    MOVE.B (A1,D4),D5   ;VALOR DEL VECINO EN D5    
     
-    CMP.W #1,D6
+    CMP.W #1,D5
     BNE .P2_8
-    ADD.W #1,D4             ;CONTADOR P1
-    JMP .SWITCH
+    ADD.W #1,D6          ;AUMENTAMOS NP1   
+    JMP .P1_P2
     
 .P2_8
 
-    CMP.W #2,D6
-    BNE .SWITCH
-    ADD.W #1,D7             ;CONTADOR P2
+    CMP.W #2,D5
+    BNE .P1_P2
+    ADD.W #1,D7      ;AUMENTAMOS NP2       
     
-    
-.SWITCH:
+
+;--------------RULES-------------------------------- 
+;COMPROBAMOS SI LA CELULA ES 1, 2 O VACIA 
+;Y SALTAMOS A SUS NORMAS ESPECIFICAS  
+.P1_P2:
     MOVE.B (A1,D1),D0
     CMP #1,D0
-    BEQ .SURVIVAL
+    BEQ .SURVIVAL1
     CMP #2,D0
     BEQ .SURVIVAL2
     BNE .BIRTH
  
 
-    ;SURVIVAL RULES FOR PLAYER1 CELL
-.SURVIVAL:
+;----------SURVIVAL RULES---------------------------
+;SURVIVAL RULES SI LA CELULA ES 1
 
-    MOVE.W D4,D0
+.SURVIVAL1:
+
+    MOVE.W D6,D0
     SUB.W D7,D0
+    ;RESTA NP1-NP2 EN D0
     CMP.W #2,D0
-    BNE .OR_1
-    MOVE.B #1,(A0,D1)
-    JMP .FINAL
-
-.OR_1
+    BNE .A_1   ; SALTAMOS PARA MIRAR SI LA RESTA VALE 3
+    JMP .MOVEMOS_1
+    
+.A_1
 
     CMP.W #3,D0
-    BNE .SECOND_IF_1
-    MOVE.B #1,(A0,D1)
-    JMP .FINAL
+    BNE .CONDICION2_1
+    JMP .MOVEMOS_1
     
-.SECOND_IF_1:
+.CONDICION2_1 ;SEGUNDA CONDICION
 
-    CMP.W #1,D0
-    BEQ .AND_1
-    MOVE.B #0,(A0,D1)
-    JMP .FINAL
-        
+    CMP.W #1,D0 ;SI VALE 1 SALTAMOS A MIRAR NP1>=2
+    BEQ .B_1
+    JMP .MOVEMOS_0
     
-    
-.AND_1:
+.B_1:
 
-    CMP #2,D4
-    BGE .NEW_VALUE_1
-    MOVE.B #0,(A0,D1)
-    JMP .FINAL
-    
-    
-    
-     
-.NEW_VALUE_1:
-
-    MOVE.B #1,(A0,D1)
-    JMP .FINAL
-
-    
+    CMP #2,D6
+    BGE .MOVEMOS_1
+    JMP .MOVEMOS_0   
 
 
-    ;SURVIVAL RULES FOR PLAYER2 CELL
+;SURVIVAL RULES SI LA CELULA ES 2
 .SURVIVAL2:
     MOVE.W D7,D0
-    SUB.W D4,D0
+    SUB.W D6,D0  ;NP2-NP1 EN D0
+    ;CONDICION 1
     CMP.W #2,D0
-    BNE .OR_2
-    MOVE.B #2,(A0,D1)
-    JMP .FINAL
-
-.OR_2
+    BNE .A_2
+    JMP .MOVEMOS_2
+    ;MIRAMOS SI VALE 2
+.A_2
 
     CMP.W #3,D0
-    BNE .SECOND_IF_2
-    MOVE.B #2,(A0,D1)
-    JMP .FINAL
+    BNE .CONDICION2_2
+    JMP .MOVEMOS_2
     
-    
-.SECOND_IF_2:
+    ;CONDICION 2
+.CONDICION2_2:
 
     CMP.W #1,D0
-    BEQ .AND_2
-    MOVE.B #0,(A0,D1)
-    JMP .FINAL
-        
-    
-    
-.AND_2:
+    BEQ .B_2
+    JMP .MOVEMOS_0
+    ;MIRAMOS SI TAMBIEN VALE 2
+.B_2:
 
     CMP #2,D7
-    BGE .NEW_VALUE_2
-    MOVE.B #0,(A0,D1)
-    JMP .FINAL
+    BGE .MOVEMOS_2
+    JMP .MOVEMOS_0
+
+
  
-     
-.NEW_VALUE_2:
-
-    MOVE.B #2,(A0,D1)
-    JMP .FINAL
-
-
-    ;BIRTH RULE FOR NONE PLAYER CELL   
+;----------------BIRTH RULES----------------------------------  
 .BIRTH:
 
-    CMP #3,D4
-    BEQ .NP1
-    JMP .SEC_COND
+    CMP #3,D6
+    BEQ .COMPRUEBA_P1
+    JMP .COND_2
     
-.NP1:
+.COMPRUEBA_P1:
 
     CMP #3,D7
-    BNE .P1_BORN
-    JMP .SEC_COND
-    
-.P1_BORN
-
-    MOVE.B #1,(A0,D1)    
-    JMP .FINAL
-    
-.SEC_COND
+    BNE .MOVEMOS_1
+    JMP .COND_2    
+.COND_2
 
     CMP #3,D7
-    BEQ .NP2
-    JMP .SAME
-.NP2
+    BEQ .COMPRUEBA_P2
+    JMP .COND_3
 
-    CMP #3,D4
-    BNE .P2_BORN
-    JMP .SAME
+.COMPRUEBA_P2
+
+    CMP #3,D6
+    BEQ .COND_3
+    JMP .MOVEMOS_2
     
-.P2_BORN
+.COND_3
+    CMP #3,D6
+    BNE .MOVEMOS_0
+    CMP #3,D7
+    BNE .MOVEMOS_0
+    MOVE.L D1,D2  ;GUARDAMOS D1, POREQUE UTLRAND LO MODIFICA
+    JSR UTLRAND
+    MOVE.B D1,(A0,D2)
+    MOVE.W D2,D1  ;RECUPERAMOS D1
+    
+;---------ETIQUETAS PARA MOVER VALORES--------------------- 
+.MOVEMOS_1:
+    
+    MOVE.B #1,(A0,D1)
+    JMP .FINAL   
+.MOVEMOS_2:
 
     MOVE.B #2,(A0,D1)
     JMP .FINAL
     
-.SAME:
-
-    CMP #3,D4
-    BNE .VACIO
-    CMP #3,D7
-    BNE .VACIO
+.MOVEMOS_0:
     
-    MOVE.L D1,D2
-    
-    JSR UTLRAND    
-    ;D1 RANDOM VALUE
-    
-    MOVE.B D1,(A0,D2)
-    
-    MOVE.W D2,D1
-    
-.VACIO: MOVE.B #0,(A0,D1)
+    MOVE.B #0,(A0,D1)
+    JMP .FINAL
     
 .FINAL:
 
     ADDQ.W #1,D1
-    
-    CMP.W #GRDWIDTH*GRDHEIGH,D1    
-    BNE .LOOP
-    
+    CMP.W #GRDHEIGH*GRDWIDTH,D1    
+    BNE .BUCLE_PRINCIPAL
     MOVEM.L (A7)+, D0-D7/A0-A1
 
     RTS
@@ -804,25 +784,25 @@ GRDPLOT
     CLR.W (A2)
     
     
-    ;GREEN PEN
+    ;LAPIZ VERDE
     MOVE.B #80,D0
     MOVE.L #CLRDKGRN,D1
     TRAP #15
 
   
-    ;CHANGE WIDTH OF PEN
+    ;ANCHO DEL LAPIZ
     MOVE.B #93,D0
     MOVE.B #2,D1
     TRAP #15
     
-    ;PAINT GRID
+    ;PINTA
     
     MOVE.W  #GRDHEIGH,D5          ; NUMBER OF ROWS
     MOVE.W  #GRDWIDTH,D6          ; NUMBER OF COLUMNS
     
     MOVE.W #GRDYOFF,D2
 .FILAS
-    
+    ;PINTAMOS LAS FILAS DE LA MATRIZ
     MOVE.B #84,D0
     MOVE.W #GRDXOFF,D1
     MOVE.W #GRDPXWID,D3
@@ -836,7 +816,7 @@ GRDPLOT
     
     MOVE.W #GRDXOFF,D1
 .COLUMNAS
-        
+    ;PINTAMOS LAS COLUMNAS DE LA MATRIZ    
     MOVE.B #84,D0
     MOVE.W #GRDYOFF,D2
     MOVE.W D1,D3
@@ -851,10 +831,10 @@ GRDPLOT
     
     ;PAINT P1 AND P2 CELLS
         
-    MOVE.W  #GRDHEIGH,D5          ; NUMBER OF ROWS
+    MOVE.W  #GRDHEIGH,D5          ; NUMERO DE FILAS 
     SUBQ.W #1,D5
     
-    MOVE.W  #GRDWIDTH,D6          ; NUMBER OF COLUMNS
+    MOVE.W  #GRDWIDTH,D6          ; NUMERO DE COLUMNAS
     SUBQ.W #1,D6
     
     
@@ -873,12 +853,12 @@ GRDPLOT
     MOVE.L #CLRBLACK,D1
     TRAP #15
     
-    ;PLAYER 1
+    ;JUGADOR 1
     CMP #1,D7
-    BEQ .PLAYER1
-    ;PLAYER 2?
+    BEQ .JUGADOR1
+    ;JUGADOR 2
     CMP #2,D7
-    BEQ .PLAYER2
+    BEQ .JUGADOR2
     ;NO PLAYER
    
     ADD.W #GRDSZCEL,D3
@@ -892,13 +872,13 @@ GRDPLOT
     MOVE.W #GRDXOFF,D3
     ADD.W #GRDSZCEL,D2
     
-    MOVE.W  #GRDWIDTH,D6          ; NUMBER OF COLUMNS
+    MOVE.W  #GRDWIDTH,D6          ; NUMERO DE COLUMNAS
     SUBQ.W #1,D6
     
     DBRA D5, .FILA
     JMP .FINAL
 
-.PLAYER1:
+.JUGADOR1:
 
 
     ;PAINT RECTANGLE PLAYER 1
@@ -920,7 +900,7 @@ GRDPLOT
     JMP .LOOP_PLAYER
 
 
-.PLAYER2:
+.JUGADOR2:
 
 
     ;PAINT RECTANGLE PLAYER 2
@@ -930,7 +910,7 @@ GRDPLOT
     TRAP #15
     
     
-    ;RECTANGLE
+    ;RECTANGULO
     MOVE.B #87,D0
     MOVE.W D3,D1
     MOVE.W D2,D4
@@ -943,7 +923,7 @@ GRDPLOT
     
     ADDQ.W #1, (A2)
     
-    JMP .LOOP_PLAYER
+    JMP .BUCLE_JUGADORES
  
           
 .FINAL:
@@ -1081,6 +1061,10 @@ GRDPLOT
  
  
  
+
+
+
+
 
 
 
