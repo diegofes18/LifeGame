@@ -43,7 +43,7 @@ SYSINIT
     MOVE.B #5,D1
     TRAP #15
     
-    ;cambiamos a modo usuario
+   
     
     MOVEM.L (A7)+,D0-D1
     RTE
@@ -187,6 +187,7 @@ SCRUPD
             TRAP    #15
             MOVEM.W (A7)+,D0-D1
             RTE
+
 
 
 
